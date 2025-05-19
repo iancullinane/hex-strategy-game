@@ -15,21 +15,97 @@ public enum TerrainType
     FOREST,
 }
 
+/// <summary>
+/// Represents the possible terrain types in the game world.
+/// PLAINS: Basic grassland terrain
+/// WATER: Deep water bodies
+/// DESERT: Arid sandy regions
+/// MOUNTAIN: Elevated rocky terrain
+/// ICE: Frozen terrain
+/// SHALLOW_WATER: Coastal waters
+/// BEACH: Sandy coastal areas
+/// FOREST: Wooded regions
+/// </summary>
+
 public class Hex
 {
+
+
+
     public readonly Vector2I coordinates;
     public TerrainType terrainType;
+
+    public int food { get; set; }
+    public int production { get; set; }
 
     public Hex(Vector2I coordinates)
     {
         this.coordinates = coordinates;
     }
 
+    public override string ToString()
+    {
+        return $"[{coordinates}]->{terrainType}, food: {food}, production:{production}";
+    }
+
+    public void SetResources()
+    {
+        Random r = new Random();
+
+        switch (terrainType)
+        {
+            case TerrainType.PLAINS:
+                food = r.Next(10);
+                production = r.Next(10);
+                break;
+            case TerrainType.MOUNTAIN:
+                food = r.Next(2);
+                production = r.Next(20);
+                break;
+            case TerrainType.WATER:
+                food = 4;
+                production = 0;
+                break;
+            case TerrainType.DESERT:
+                food = r.Next(1);
+                production = r.Next(2);
+                break;
+            case TerrainType.ICE:
+                break;
+            case TerrainType.FOREST:
+                food = r.Next(5);
+                production = r.Next(15);
+                break;
+            default:
+                food = 0;
+                production = 0;
+                break;
+
+        }
+
+    }
 
 }
 
+/// <summary>
+/// A hexagonal TileMap representation. Contains a base layer, border layer, and overlay layer.
+/// </summary>
+
 public partial class TileMap : Node2D
 {
+
+
+    // Ui
+    // ------------------------------------------------------------
+    UiManager uiManager;
+
+    public delegate void HexSelectedEventHandler(Hex h);
+    public event HexSelectedEventHandler SendHexData;
+
+
+
+    // ------------------------------------------------------------
+
     [Export]
     public int height = 100;
 
@@ -37,7 +113,15 @@ public partial class TileMap : Node2D
     public int width = 60;
 
     [Export]
-    FastNoiseLite noise;
+    FastNoiseLite baseNoise;
+
+    [Export]
+    FastNoiseLite forestNoise;
+    [Export]
+    FastNoiseLite desertNoise;
+
+    [Export]
+    FastNoiseLite mountainNoise;
 
     // Map data
     TileMapLayer baseLayer, borderLayer, overlayLayer;
@@ -45,9 +129,15 @@ public partial class TileMap : Node2D
 
     Dictionary<TerrainType, Vector2I> terrainTextures;
 
+    NoiseMapFactory noiseMapFactory;
+
+    Vector2I currentSelectedHex = new Vector2I(-1, -1);
 
     public override void _Ready()
     {
+
+        uiManager = GetNode<UiManager>("/root/Game/CanvasLayer/UiManager");
+
         GD.Print($"Creating map with width: {width} and height: {height}");
         baseLayer = GetNode<TileMapLayer>("BaseLayer");
         borderLayer = GetNode<TileMapLayer>("BorderLayer");
@@ -57,22 +147,29 @@ public partial class TileMap : Node2D
         // or whatever directly into the mapData
         mapData = new Dictionary<Vector2I, Hex>();
 
+        noiseMapFactory = new NoiseMapFactory(baseNoise, forestNoise, desertNoise, mountainNoise);
 
-        terrainTextures = new Dictionary<TerrainType, Vector2I>
-        {
-            {TerrainType.PLAINS, new Vector2I(0, 0)},
-            {TerrainType.WATER, new Vector2I(1, 0)},
-            {TerrainType.DESERT, new Vector2I(0, 1)},
-            {TerrainType.MOUNTAIN, new Vector2I(1, 1)},
-            {TerrainType.SHALLOW_WATER, new Vector2I(1, 2)},
-            {TerrainType.BEACH, new Vector2I(0, 2)},
-            {TerrainType.FOREST, new Vector2I(1, 3)},
-            {TerrainType.ICE, new Vector2I(0, 3)},
-        };
-
+        InitializeTerrainTextures();
         GenerateTerrain();
+        GenerateResources();
+
+        this.SendHexData += uiManager.SetSelectionUi;
+
+
+
+
+
     }
 
+
+    public void GenerateResources()
+    {
+        Random r = new Random();
+        foreach (var hex in mapData)
+        {
+            hex.Value.SetResources();
+        }
+    }
 
     public void GenerateTerrain()
     {
@@ -84,10 +181,10 @@ public partial class TileMap : Node2D
         float[,] localMountainMap = new float[width, height];
 
         // Generate base terrain noise
-        NoiseMapData baseNoiseData = NoiseMapFactory.CreateNoiseMap(NoiseMapType.BASE);
-        NoiseMapData forestNoiseData = NoiseMapFactory.CreateNoiseMap(NoiseMapType.FOREST);
-        NoiseMapData desertNoiseData = NoiseMapFactory.CreateNoiseMap(NoiseMapType.DESERT);
-        NoiseMapData mountainNoiseData = NoiseMapFactory.CreateNoiseMap(NoiseMapType.MOUNTAIN);
+        NoiseMapData baseNoiseData = noiseMapFactory.CreateNoiseMap(NoiseMapType.BASE);
+        NoiseMapData forestNoiseData = noiseMapFactory.CreateNoiseMap(NoiseMapType.FOREST);
+        NoiseMapData desertNoiseData = noiseMapFactory.CreateNoiseMap(NoiseMapType.DESERT);
+        NoiseMapData mountainNoiseData = noiseMapFactory.CreateNoiseMap(NoiseMapType.MOUNTAIN);
 
         // the passed in map is passed by reference and so mutable
         baseNoiseData.PopulateNoiseMap(localBaseMap, width, height);
@@ -95,8 +192,6 @@ public partial class TileMap : Node2D
         desertNoiseData.PopulateNoiseMap(localDesertMap, width, height);
         mountainNoiseData.PopulateNoiseMap(localMountainMap, width, height);
 
-
-        GD.Print($"noiseMax: {baseNoiseData.MaxValue}");
         // I wonder if I could turn this into something which could be exported
         // OR! even cooler tweaked and re-rendered as the values are edited (or as a CustomResource)
         List<(float Min, float Max, TerrainType Type)> terrainGenValues = new List<(float Min, float Max, TerrainType Type)>
@@ -105,15 +200,11 @@ public partial class TileMap : Node2D
             (baseNoiseData.MaxValue/10 * 2.5f, baseNoiseData.MaxValue/10*4f, TerrainType.SHALLOW_WATER),
             (baseNoiseData.MaxValue/10*4f, baseNoiseData.MaxValue/10*4.5f, TerrainType.BEACH),
             (baseNoiseData.MaxValue/10*4.5f, baseNoiseData.MaxValue/10 + 1f, TerrainType.PLAINS), // The + is a little buffer, this is actually noiseMax itself, though if it is not set correctly map generation will exit early. Here I gave it a huge buffer.
-            // (noiseMax/10*5f, noiseMax/10*5.5f, TerrainType.FOREST),
-            // (noiseMax/10*5.5f, noiseMax/10*6f, TerrainType.MOUNTAIN),
-            // (noiseMax/10*6f, noiseMax/10*6.5f, TerrainType.ICE),
         };
 
-        // Forest gen
-        Vector2 forestGenValues = new Vector2(forestNoiseData.MaxValue / 10 * 4, forestNoiseData.MaxValue + 0.05f);
-        Vector2 desertGenValues = new Vector2(desertNoiseData.MaxValue / 10 * 9, desertNoiseData.MaxValue + 0.05f);
-        Vector2 mountainGenValues = new Vector2(mountainNoiseData.MaxValue / 10 * 2, mountainNoiseData.MaxValue + 0.05f);
+        Vector2 forestGenValues = new Vector2(forestNoiseData.MaxValue / 10 * 5, forestNoiseData.MaxValue + 0.05f);
+        Vector2 desertGenValues = new Vector2(desertNoiseData.MaxValue / 10 * 8, desertNoiseData.MaxValue + 0.05f);
+        Vector2 mountainGenValues = new Vector2(mountainNoiseData.MaxValue / 10 * 8f, mountainNoiseData.MaxValue + 0.05f);
 
         for (int x = 0; x < width; x++)
         {
@@ -143,9 +234,9 @@ public partial class TileMap : Node2D
                     h.terrainType = TerrainType.FOREST;
                 }
 
-                // Forest
-                if (localForestMap[x, y] >= mountainGenValues[0] &&
-                    localForestMap[x, y] <= mountainGenValues[1] &&
+                // Mountain
+                if (localMountainMap[x, y] >= mountainGenValues[0] &&
+                    localMountainMap[x, y] <= mountainGenValues[1] &&
                     h.terrainType == TerrainType.PLAINS)
                 {
                     h.terrainType = TerrainType.MOUNTAIN;
@@ -156,6 +247,28 @@ public partial class TileMap : Node2D
                 baseLayer.SetCell(new Vector2I(x, y), 0, terrainTextures[h.terrainType]);
                 borderLayer.SetCell(new Vector2I(x, y), 2, new Vector2I(0, 0));
             }
+
+        }
+
+        int maxIce = 5;
+        Random r = new Random();
+        for (int x = 0; x < width; x++)
+        {
+            // North Pole
+            for (int y = 0; y < r.Next(maxIce) + 1; y++)
+            {
+                Hex h = mapData[new Vector2I(x, y)];
+                h.terrainType = TerrainType.ICE;
+                baseLayer.SetCell(new Vector2I(x, y), 0, terrainTextures[h.terrainType]);
+            }
+
+            // South Pole
+            for (int y = height - 1; y > height - 1 - r.Next(maxIce) - 1; y--)
+            {
+                Hex h = mapData[new Vector2I(x, y)];
+                h.terrainType = TerrainType.ICE;
+                baseLayer.SetCell(new Vector2I(x, y), 0, terrainTextures[h.terrainType]);
+            }
         }
     }
 
@@ -165,5 +278,48 @@ public partial class TileMap : Node2D
     public Vector2 MapToLocal(Vector2I coords)
     {
         return baseLayer.MapToLocal(coords);
+    }
+
+    public Vector2I GetMapPosition()
+    {
+        return baseLayer.LocalToMap(ToLocal(GetGlobalMousePosition()));
+    }
+
+    public Hex GetHexAtMapPosition(Vector2I coords)
+    {
+        return mapData[coords];
+    }
+
+    public void ClearHexSelection()
+    {
+        overlayLayer.SetCell(currentSelectedHex, -1);
+        currentSelectedHex = new Vector2I(-1, -1);
+    }
+
+    public void SetHexSelection(Vector2I coords)
+    {
+        if (currentSelectedHex == coords)
+        {
+            return;
+        }
+        overlayLayer.SetCell(currentSelectedHex, -1);
+        overlayLayer.SetCell(coords, 2, new Vector2I(0, 1));
+        currentSelectedHex = coords;
+        SendHexData?.Invoke(mapData[coords]);
+    }
+
+    private void InitializeTerrainTextures()
+    {
+        terrainTextures = new Dictionary<TerrainType, Vector2I>
+        {
+            {TerrainType.PLAINS, new Vector2I(0, 0)},
+            {TerrainType.WATER, new Vector2I(1, 0)},
+            {TerrainType.DESERT, new Vector2I(0, 1)},
+            {TerrainType.MOUNTAIN, new Vector2I(1, 1)},
+            {TerrainType.SHALLOW_WATER, new Vector2I(1, 2)},
+            {TerrainType.BEACH, new Vector2I(0, 2)},
+            {TerrainType.FOREST, new Vector2I(1, 3)},
+            {TerrainType.ICE, new Vector2I(0, 3)},
+       };
     }
 }

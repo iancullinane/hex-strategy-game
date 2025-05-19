@@ -18,8 +18,8 @@ config/icon="uid://ckpxwab3qqlic"
 
 [display]
 
-window/size/viewport_width=2600
-window/size/viewport_height=1400
+window/size/viewport_width=2000
+window/size/viewport_height=1200
 
 [dotnet]
 

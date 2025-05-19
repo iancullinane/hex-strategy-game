@@ -1,9 +1,67 @@
 using Godot;
 using System;
 
+/// <summary>
+/// Factory class for creating noise maps used in terrain generation.
+/// Manages different noise generators for various terrain features like base terrain,
+/// forests, deserts, and mountains. Each noise generator can be configured with
+/// different parameters to create distinct terrain patterns.
+/// </summary>
+public class NoiseMapFactory
+{
+    private FastNoiseLite baseNoise;
+    private FastNoiseLite forestNoise;
+    private FastNoiseLite desertNoise;
+    private FastNoiseLite mountainNoise;
+
+    public NoiseMapFactory(FastNoiseLite baseNoise, FastNoiseLite forestNoise,
+                          FastNoiseLite desertNoise, FastNoiseLite mountainNoise)
+    {
+        this.baseNoise = baseNoise;
+        this.forestNoise = forestNoise;
+        this.desertNoise = desertNoise;
+        this.mountainNoise = mountainNoise;
+    }
+
+    /// <summary>
+    /// Creates a NoiseMapData object configured for the specified terrain type.
+    /// </summary>
+    /// <param name="type">The type of noise map to create</param>
+    /// <returns>A NoiseMapData object configured with the appropriate noise generator</returns>
+    public NoiseMapData CreateNoiseMap(NoiseMapType type)
+    {
+        NoiseMapData noiseData = new NoiseMapData();
+        switch (type)
+        {
+            case NoiseMapType.BASE:
+                noiseData.Noise = baseNoise;
+                break;
+            case NoiseMapType.FOREST:
+                noiseData.Noise = forestNoise;
+                break;
+            case NoiseMapType.DESERT:
+                noiseData.Noise = desertNoise;
+                break;
+            case NoiseMapType.MOUNTAIN:
+                noiseData.Noise = mountainNoise;
+                break;
+        }
+        return noiseData;
+    }
+}
+
+/// <summary>
+/// Represents a noise map with its associated noise generator and maximum value.
+/// Contains methods for populating a 2D array with noise values and tracking the
+/// highest value generated. Used in terrain generation to create varied landscapes
+/// by mapping noise values to different terrain types.
+/// </summary>
 public class NoiseMapData
 {
+    // Noise is the noise generation object, should be passed in during creation
     public FastNoiseLite Noise { get; set; }
+    // MaxValue is the highest value reached during
+    // map population, we use it as a clamp
     public float MaxValue { get; private set; }
 
     public NoiseMapData()
@@ -20,6 +78,15 @@ public class NoiseMapData
         }
     }
 
+    /// <summary>
+    /// Populates the incoming noise map with values from this objects generator
+    /// Accomplishes this by iterating over both dimensions of the incoming map
+    /// and setting the value of each cell to the absolute value of the noise
+    /// generator at that cell's coordinates.
+    /// </summary>
+    /// <param name="map">The map to populate</param>
+    /// <param name="width">The width of the map</param>
+    /// <param name="height">The height of the map</param>
     public void PopulateNoiseMap(float[,] map, int width, int height)
     {
         GD.Print("Creating map with width: {0} and height: {1}", width, height);
@@ -46,59 +113,3 @@ public enum NoiseMapType
     MOUNTAIN
 }
 
-/// <summary>
-/// Factory class for creating different types of noise maps used in terrain generation.
-/// </summary>
-public class NoiseMapFactory
-{
-    private static readonly Random _random = new Random();
-
-    /// <summary>
-    /// Creates a noise map with parameters configured based on the specified type.
-    /// </summary>
-    /// <param name="type">The type of noise map to create (BASE, FOREST, etc)</param>
-    /// <returns>A NoiseMapData object containing the configured noise generator</returns>
-    /// <exception cref="ArgumentException">Thrown when an unknown noise map type is provided</exception>
-    public static NoiseMapData CreateNoiseMap(NoiseMapType type)
-    {
-        NoiseMapData noiseMapData = new NoiseMapData();
-        // This is just to make below here less verbose
-        var noise = noiseMapData.Noise;
-        noise.Seed = _random.Next(100000);
-
-        switch (type)
-        {
-            case NoiseMapType.BASE:
-                noise.Frequency = 0.008f;
-                noise.FractalType = FastNoiseLite.FractalTypeEnum.Fbm;
-                noise.FractalOctaves = 4;
-                noise.FractalLacunarity = 2.25f;
-                break;
-            case NoiseMapType.FOREST:
-                noise.Frequency = 0.04f;
-                noise.NoiseType = FastNoiseLite.NoiseTypeEnum.Cellular;
-                noise.FractalType = FastNoiseLite.FractalTypeEnum.Fbm;
-                noise.FractalLacunarity = 2.0f;
-                break;
-            case NoiseMapType.DESERT:
-                noise.Frequency = 0.015f;
-                noise.NoiseType = FastNoiseLite.NoiseTypeEnum.SimplexSmooth;
-                noise.FractalType = FastNoiseLite.FractalTypeEnum.Fbm;
-                noise.FractalOctaves = 3;
-                noise.FractalLacunarity = 2f;
-                break;
-            case NoiseMapType.MOUNTAIN:
-                noise.Frequency = 0.0121f;
-                noise.NoiseType = FastNoiseLite.NoiseTypeEnum.Value;
-                noise.FractalType = FastNoiseLite.FractalTypeEnum.PingPong;
-                noise.FractalOctaves = 5;
-                noise.FractalLacunarity = 2.0f;
-                break;
-            default:
-                throw new ArgumentException($"Unknown noise map type: {type}");
-        }
-
-        noiseMapData.Noise = noise;
-        return noiseMapData;
-    }
-}
