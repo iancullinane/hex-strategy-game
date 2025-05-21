@@ -13,9 +13,17 @@ public partial class UiManager : Node2D
         selectionUiScene = ResourceLoader.Load<PackedScene>("components/ui/selection_ui.tscn");
     }
 
+    public void HideAllPopups()
+    {
+        if (selectionUI is not null)
+        {
+            selectionUI.QueueFree();
+            selectionUI = null;
+        }
+    }
+
     public void SetSelectionUi(Hex h)
     {
-        GD.Print("Setting selection UI with hex: ", h);
         if (selectionUI is not null) selectionUI.QueueFree();
         // selectionUI = selectionUiScene.Instantiate<SelectionUI>();
         // or

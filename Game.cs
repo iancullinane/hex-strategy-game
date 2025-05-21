@@ -45,6 +45,5 @@ public partial class Game : Node
 
         map.SetHexSelection(selectedCoords);
         Hex selectedHex = map.GetHexAtMapPosition(selectedCoords);
-        GD.Print($"Selected hex: {selectedHex}");
     }
 }

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="NoiseConfig" load_steps=6 format=3 uid="uid://cc3odiu0tibss"]
+
+[ext_resource type="Script" uid="uid://bhhowcvqwgnvd" path="res://resources/custom/map/NoiseConfig.cs" id="1_ish3w"]
+[ext_resource type="FastNoiseLite" uid="uid://cvboanklqnjro" path="res://utils/baseNoise.tres" id="1_s4175"]
+[ext_resource type="FastNoiseLite" uid="uid://fci7kf0qx5ok" path="res://utils/desertNoise.tres" id="2_gy50h"]
+[ext_resource type="FastNoiseLite" uid="uid://c5766qh5y84rx" path="res://utils/forestNoise.tres" id="3_5u5ta"]
+[ext_resource type="FastNoiseLite" uid="uid://bp8t2blaxc3xm" path="res://utils/mountainNoise.tres" id="4_pprjf"]
+
+[resource]
+script = ExtResource("1_ish3w")
+BaseNoise = ExtResource("1_s4175")
+ForestNoise = ExtResource("3_5u5ta")
+DesertNoise = ExtResource("2_gy50h")
+MountainNoise = ExtResource("4_pprjf")
+metadata/_custom_type_script = "uid://bhhowcvqwgnvd"

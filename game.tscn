@@ -1,22 +1,18 @@
-[gd_scene load_steps=12 format=3 uid="uid://chaxhjuvnqegi"]
+[gd_scene load_steps=9 format=3 uid="uid://chaxhjuvnqegi"]
 
 [ext_resource type="Script" uid="uid://dqyurt4shygtu" path="res://Game.cs" id="1_80nbo"]
 [ext_resource type="Script" uid="uid://dxomqqyd4xwcp" path="res://components/map/TileMap.cs" id="2_feb5d"]
 [ext_resource type="Texture2D" uid="uid://gakigkw6iqog" path="res://assets/images/wooden_table.jpg" id="2_hve3p"]
 [ext_resource type="TileSet" uid="uid://bqc5g484obtd" path="res://resources/tiles/base_tileset.tres" id="3_feb5d"]
-[ext_resource type="FastNoiseLite" uid="uid://cvboanklqnjro" path="res://utils/baseNoise.tres" id="3_vef74"]
 [ext_resource type="TileSet" uid="uid://bp0alv0hmtfrn" path="res://resources/tiles/border_tileset.tres" id="4_fc0e3"]
-[ext_resource type="FastNoiseLite" uid="uid://c5766qh5y84rx" path="res://utils/forestNoise.tres" id="4_hve3p"]
+[ext_resource type="Resource" uid="uid://cc3odiu0tibss" path="res://resources/custom/map/base_noise_config.tres" id="4_j5wjh"]
 [ext_resource type="Script" uid="uid://ctev7rbvgs867" path="res://components/Camera.cs" id="5_7jktm"]
-[ext_resource type="FastNoiseLite" uid="uid://fci7kf0qx5ok" path="res://utils/desertNoise.tres" id="5_mfdv2"]
-[ext_resource type="FastNoiseLite" uid="uid://bp8t2blaxc3xm" path="res://utils/mountainNoise.tres" id="6_iotsf"]
 [ext_resource type="PackedScene" uid="uid://ctu627lo3ydry" path="res://components/ui/ui_manager.tscn" id="11_mfdv2"]
 
 [node name="Game" type="Node"]
 script = ExtResource("1_80nbo")
 
 [node name="Background" type="Sprite2D" parent="."]
-visible = false
 position = Vector2(12697.7, 8553.25)
 scale = Vector2(7.73075, 7.73075)
 texture = ExtResource("2_hve3p")
@@ -24,10 +20,7 @@ texture = ExtResource("2_hve3p")
 [node name="TileMap" type="Node2D" parent="."]
 script = ExtResource("2_feb5d")
 width = 100
-baseNoise = ExtResource("3_vef74")
-forestNoise = ExtResource("4_hve3p")
-desertNoise = ExtResource("5_mfdv2")
-mountainNoise = ExtResource("6_iotsf")
+noiseConfig = ExtResource("4_j5wjh")
 
 [node name="BaseLayer" type="TileMapLayer" parent="TileMap"]
 tile_set = ExtResource("3_feb5d")

@@ -14,13 +14,12 @@ public class NoiseMapFactory
     private FastNoiseLite desertNoise;
     private FastNoiseLite mountainNoise;
 
-    public NoiseMapFactory(FastNoiseLite baseNoise, FastNoiseLite forestNoise,
-                          FastNoiseLite desertNoise, FastNoiseLite mountainNoise)
+    public NoiseMapFactory(NoiseConfig noiseConfig)
     {
-        this.baseNoise = baseNoise;
-        this.forestNoise = forestNoise;
-        this.desertNoise = desertNoise;
-        this.mountainNoise = mountainNoise;
+        this.baseNoise = noiseConfig.BaseNoise;
+        this.forestNoise = noiseConfig.ForestNoise;
+        this.desertNoise = noiseConfig.DesertNoise;
+        this.mountainNoise = noiseConfig.MountainNoise;
     }
 
     /// <summary>

@@ -26,7 +26,6 @@ public enum TerrainType
 /// BEACH: Sandy coastal areas
 /// FOREST: Wooded regions
 /// </summary>
-
 public class Hex
 {
 
@@ -101,9 +100,9 @@ public partial class TileMap : Node2D
 
     public delegate void HexSelectedEventHandler(Hex h);
     public event HexSelectedEventHandler SendHexData;
+    Vector2I currentSelectedHex = new Vector2I(-1, -1);
 
-
-
+    // Map settings
     // ------------------------------------------------------------
 
     [Export]
@@ -113,63 +112,64 @@ public partial class TileMap : Node2D
     public int width = 60;
 
     [Export]
-    FastNoiseLite baseNoise;
-
-    [Export]
-    FastNoiseLite forestNoise;
-    [Export]
-    FastNoiseLite desertNoise;
-
-    [Export]
-    FastNoiseLite mountainNoise;
-
-    // Map data
-    TileMapLayer baseLayer, borderLayer, overlayLayer;
-    Dictionary<Vector2I, Hex> mapData;
-
-    Dictionary<TerrainType, Vector2I> terrainTextures;
+    public NoiseConfig noiseConfig;
 
     NoiseMapFactory noiseMapFactory;
 
-    Vector2I currentSelectedHex = new Vector2I(-1, -1);
+    // Map data
+    Dictionary<Vector2I, Hex> mapData;
+
+    // Map graphics
+    // ------------------------------------------------------------
+    TileMapLayer baseLayer, borderLayer, overlayLayer;
+    Dictionary<TerrainType, Vector2I> terrainTextures;
+
+
 
     public override void _Ready()
     {
-
-        uiManager = GetNode<UiManager>("/root/Game/CanvasLayer/UiManager");
-
         GD.Print($"Creating map with width: {width} and height: {height}");
-        baseLayer = GetNode<TileMapLayer>("BaseLayer");
-        borderLayer = GetNode<TileMapLayer>("BorderLayer");
-        overlayLayer = GetNode<TileMapLayer>("OverlayLayer");
 
-        // Again could be a type or something and then place files
-        // or whatever directly into the mapData
+        SetupNodeRefs();
+        noiseMapFactory = new NoiseMapFactory(noiseConfig);
+
+        // Still feel this could live somewhere else, but maybe not anymore :grug:
         mapData = new Dictionary<Vector2I, Hex>();
-
-        noiseMapFactory = new NoiseMapFactory(baseNoise, forestNoise, desertNoise, mountainNoise);
 
         InitializeTerrainTextures();
         GenerateTerrain();
         GenerateResources();
 
+        // Reference to uiManager contains the signal, tie the local SendHexData
+        // method to uiManager, this will receive a hex from the ui selection
         this.SendHexData += uiManager.SetSelectionUi;
-
-
-
-
-
     }
-
-
-    public void GenerateResources()
+    private void SetupNodeRefs()
     {
-        Random r = new Random();
-        foreach (var hex in mapData)
-        {
-            hex.Value.SetResources();
-        }
+        uiManager = GetNode<UiManager>("/root/Game/CanvasLayer/UiManager");
+        baseLayer = GetNode<TileMapLayer>("BaseLayer");
+        borderLayer = GetNode<TileMapLayer>("BorderLayer");
+        overlayLayer = GetNode<TileMapLayer>("OverlayLayer");
     }
+
+    private void InitializeTerrainTextures()
+    {
+        terrainTextures = new Dictionary<TerrainType, Vector2I>
+        {
+            {TerrainType.PLAINS, new Vector2I(0, 0)},
+            {TerrainType.WATER, new Vector2I(1, 0)},
+            {TerrainType.DESERT, new Vector2I(0, 1)},
+            {TerrainType.MOUNTAIN, new Vector2I(1, 1)},
+            {TerrainType.SHALLOW_WATER, new Vector2I(1, 2)},
+            {TerrainType.BEACH, new Vector2I(0, 2)},
+            {TerrainType.FOREST, new Vector2I(1, 3)},
+            {TerrainType.ICE, new Vector2I(0, 3)},
+       };
+    }
+
+    // Terrain Generation
+    // ------------------------------------------------------------
+
 
     public void GenerateTerrain()
     {
@@ -272,6 +272,18 @@ public partial class TileMap : Node2D
         }
     }
 
+    public void GenerateResources()
+    {
+        Random r = new Random();
+        foreach (var hex in mapData)
+        {
+            hex.Value.SetResources();
+        }
+    }
+
+    // Utils
+    // ------------------------------------------------------------
+
     // Convert map coordinates to local coordinates, since all the a
     // layers are the same size we could use on of them, but we use
     // the baseLayer because obviously
@@ -294,6 +306,7 @@ public partial class TileMap : Node2D
     {
         overlayLayer.SetCell(currentSelectedHex, -1);
         currentSelectedHex = new Vector2I(-1, -1);
+        uiManager.HideAllPopups();
     }
 
     public void SetHexSelection(Vector2I coords)
@@ -308,18 +321,5 @@ public partial class TileMap : Node2D
         SendHexData?.Invoke(mapData[coords]);
     }
 
-    private void InitializeTerrainTextures()
-    {
-        terrainTextures = new Dictionary<TerrainType, Vector2I>
-        {
-            {TerrainType.PLAINS, new Vector2I(0, 0)},
-            {TerrainType.WATER, new Vector2I(1, 0)},
-            {TerrainType.DESERT, new Vector2I(0, 1)},
-            {TerrainType.MOUNTAIN, new Vector2I(1, 1)},
-            {TerrainType.SHALLOW_WATER, new Vector2I(1, 2)},
-            {TerrainType.BEACH, new Vector2I(0, 2)},
-            {TerrainType.FOREST, new Vector2I(1, 3)},
-            {TerrainType.ICE, new Vector2I(0, 3)},
-       };
-    }
+
 }
