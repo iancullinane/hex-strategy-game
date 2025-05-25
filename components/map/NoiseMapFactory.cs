@@ -88,7 +88,6 @@ public class NoiseMapData
     /// <param name="height">The height of the map</param>
     public void PopulateNoiseMap(float[,] map, int width, int height)
     {
-        GD.Print("Creating map with width: {0} and height: {1}", width, height);
         for (int x = 0; x < width; x++)
         {
             for (int y = 0; y < height; y++)

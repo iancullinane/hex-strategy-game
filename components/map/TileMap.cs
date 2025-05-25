@@ -93,6 +93,10 @@ public class Hex
 public partial class TileMap : Node2D
 {
 
+    // Loads
+    // ------------------------------------------------------------
+    PackedScene cityScene;
+
 
     // Ui
     // ------------------------------------------------------------
@@ -105,11 +109,14 @@ public partial class TileMap : Node2D
     // Map settings
     // ------------------------------------------------------------
 
-    [Export]
-    public int height = 100;
 
-    [Export]
+    public int height = 100;
     public int width = 60;
+    // [Export]
+    // public int height = 100;
+
+    // [Export]
+    // public int width = 60;
 
     [Export]
     public NoiseConfig noiseConfig;
@@ -128,13 +135,14 @@ public partial class TileMap : Node2D
 
     public override void _Ready()
     {
-        GD.Print($"Creating map with width: {width} and height: {height}");
+        GD.Print($"Load resources and setup");
+        cityScene = GD.Load<PackedScene>("res://scenes/city.tscn");
 
         SetupNodeRefs();
         noiseMapFactory = new NoiseMapFactory(noiseConfig);
-
-        // Still feel this could live somewhere else, but maybe not anymore :grug:
         mapData = new Dictionary<Vector2I, Hex>();
+
+        GD.Print($"Creating map with width: {width} and height: {height}");
 
         InitializeTerrainTextures();
         GenerateTerrain();
@@ -143,10 +151,16 @@ public partial class TileMap : Node2D
         // Reference to uiManager contains the signal, tie the local SendHexData
         // method to uiManager, this will receive a hex from the ui selection
         this.SendHexData += uiManager.SetSelectionUi;
+
+
+        // Create a city
+        CreateCity(new Civilization("Test"), new Vector2I(height / 2, width / 2), "Test City");
+
     }
     private void SetupNodeRefs()
     {
-        uiManager = GetNode<UiManager>("/root/Game/CanvasLayer/UiManager");
+        uiManager = GetNode<UiManager>("/root/Game/CanvasLayer/NewUiManager");
+        // uiManager = GetNode<UiManager>("/root/Game/CanvasLayer/UiManager");
         baseLayer = GetNode<TileMapLayer>("BaseLayer");
         borderLayer = GetNode<TileMapLayer>("BorderLayer");
         overlayLayer = GetNode<TileMapLayer>("OverlayLayer");
@@ -166,6 +180,31 @@ public partial class TileMap : Node2D
             {TerrainType.ICE, new Vector2I(0, 3)},
        };
     }
+
+
+    // City Generation
+    // ------------------------------------------------------------
+    public void CreateCity(Civilization civ, Vector2I coords, string name)
+    {
+        City city = cityScene.Instantiate() as City;
+        city.map = this;
+        civ.cities.Add(city);
+        city.civ = civ;
+
+        AddChild(city);
+
+        // Set Color of icon
+        // Set the city name
+        // Set the coordinates of the city (map & world)
+        city.centerCoordinates = coords;
+        city.Position = baseLayer.MapToLocal(coords);
+        // Adding territory
+        // populate borders
+    }
+
+
+
+
 
     // Terrain Generation
     // ------------------------------------------------------------
@@ -280,6 +319,9 @@ public partial class TileMap : Node2D
             hex.Value.SetResources();
         }
     }
+
+
+
 
     // Utils
     // ------------------------------------------------------------

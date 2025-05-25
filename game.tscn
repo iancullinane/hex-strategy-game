@@ -1,25 +1,27 @@
-[gd_scene load_steps=9 format=3 uid="uid://chaxhjuvnqegi"]
+[gd_scene load_steps=10 format=3 uid="uid://chaxhjuvnqegi"]
 
 [ext_resource type="Script" uid="uid://dqyurt4shygtu" path="res://Game.cs" id="1_80nbo"]
 [ext_resource type="Script" uid="uid://dxomqqyd4xwcp" path="res://components/map/TileMap.cs" id="2_feb5d"]
 [ext_resource type="Texture2D" uid="uid://gakigkw6iqog" path="res://assets/images/wooden_table.jpg" id="2_hve3p"]
+[ext_resource type="Resource" uid="uid://q60qd3o17apa" path="res://resources/custom/game/base_game_config.tres" id="2_vef74"]
 [ext_resource type="TileSet" uid="uid://bqc5g484obtd" path="res://resources/tiles/base_tileset.tres" id="3_feb5d"]
 [ext_resource type="TileSet" uid="uid://bp0alv0hmtfrn" path="res://resources/tiles/border_tileset.tres" id="4_fc0e3"]
 [ext_resource type="Resource" uid="uid://cc3odiu0tibss" path="res://resources/custom/map/base_noise_config.tres" id="4_j5wjh"]
 [ext_resource type="Script" uid="uid://ctev7rbvgs867" path="res://components/Camera.cs" id="5_7jktm"]
-[ext_resource type="PackedScene" uid="uid://ctu627lo3ydry" path="res://components/ui/ui_manager.tscn" id="11_mfdv2"]
+[ext_resource type="Script" uid="uid://7su1nnwnw4lt" path="res://components/ui/UiManager.cs" id="10_hve3p"]
 
 [node name="Game" type="Node"]
 script = ExtResource("1_80nbo")
+gameConfig = ExtResource("2_vef74")
 
 [node name="Background" type="Sprite2D" parent="."]
+visible = false
 position = Vector2(12697.7, 8553.25)
 scale = Vector2(7.73075, 7.73075)
 texture = ExtResource("2_hve3p")
 
 [node name="TileMap" type="Node2D" parent="."]
 script = ExtResource("2_feb5d")
-width = 100
 noiseConfig = ExtResource("4_j5wjh")
 
 [node name="BaseLayer" type="TileMapLayer" parent="TileMap"]
@@ -41,4 +43,19 @@ velocity = 30
 
 [node name="CanvasLayer" type="CanvasLayer" parent="."]
 
-[node name="UiManager" parent="CanvasLayer" instance=ExtResource("11_mfdv2")]
+[node name="NewUiManager" type="Control" parent="CanvasLayer"]
+layout_mode = 3
+anchor_left = 0.4
+anchor_top = 0.4
+anchor_right = 0.6
+anchor_bottom = 0.6
+offset_left = -996.0
+offset_top = -599.0
+offset_right = -996.0
+offset_bottom = -599.0
+grow_horizontal = 2
+grow_vertical = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+mouse_filter = 2
+script = ExtResource("10_hve3p")

@@ -1,0 +1,12 @@
+[gd_resource type="Resource" script_class="GameConfig" load_steps=2 format=3 uid="uid://q60qd3o17apa"]
+
+[ext_resource type="Script" uid="uid://dp54jav053dwy" path="res://resources/custom/game/GameConfig.cs" id="1_ccwsq"]
+
+[resource]
+script = ExtResource("1_ccwsq")
+MapWidth = 60
+MapHeight = 100
+CameraZoom = 1.0
+CameraOffset = Vector2(0, 0)
+DebugMode = false
+metadata/_custom_type_script = "uid://dp54jav053dwy"

@@ -1,0 +1,22 @@
+[gd_scene load_steps=4 format=3 uid="uid://bp7j5vln4aw4p"]
+
+[ext_resource type="Script" uid="uid://b50m176gkwboc" path="res://scenes/City.cs" id="1_58ubr"]
+[ext_resource type="Texture2D" uid="uid://bwtq3fjwm7wq0" path="res://assets/images/city.png" id="1_bih7l"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_58ubr"]
+
+[node name="City" type="Node2D"]
+script = ExtResource("1_58ubr")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("1_bih7l")
+
+[node name="Label" type="Label" parent="."]
+offset_left = -79.0
+offset_top = 37.0
+offset_right = 80.0
+offset_bottom = 60.0
+text = "Object"
+label_settings = SubResource("LabelSettings_58ubr")
+horizontal_alignment = 1
+vertical_alignment = 1

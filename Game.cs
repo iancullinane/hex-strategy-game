@@ -5,6 +5,12 @@ public partial class Game : Node
 {
     private TileMap map;
 
+    [Export]
+    public GameConfig gameConfig;
+
+
+    // [Export]
+    // public UiManager uiManager;
 
     public override void _Ready()
     {
@@ -12,9 +18,21 @@ public partial class Game : Node
         Camera camera = GetNode<Camera>("Camera");
         map = GetNode<TileMap>("TileMap");
 
+        // Use config values
+        GD.Print($"Read config for width: {gameConfig.MapWidth} and height: {gameConfig.MapHeight}");
+        map.width = gameConfig.MapWidth;
+        map.height = gameConfig.MapHeight;
+
         // Calculate center position
         Vector2 centerPos = map.MapToLocal(new Vector2I(map.width / 2, map.height / 2));
         camera.Position = centerPos;
+
+
+
+        if (gameConfig.DebugMode)
+        {
+            GD.Print("Debug mode enabled");
+        }
     }
 
 

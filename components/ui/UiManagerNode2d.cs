@@ -1,7 +1,7 @@
 using Godot;
 using System;
 
-public partial class UiManager : Control
+public partial class UiManagerNode : Node2D
 {
 
     PackedScene selectionUiScene;
@@ -13,16 +13,14 @@ public partial class UiManager : Control
     public override void _Ready()
     {
         selectionUiScene = ResourceLoader.Load<PackedScene>("components/ui/selection_ui.tscn");
-        startGameUiScene = ResourceLoader.Load<PackedScene>("components/ui/StartGameUi.tscn"); ;
+        startGameUiScene = ResourceLoader.Load<PackedScene>("components/ui/start_game_ui.tscn"); ;
 
         startGameUi = (StartGameUi)startGameUiScene.Instantiate();
 
-        var viewportSize = GetViewport().GetVisibleRect().Size;
-        var uiSize = startGameUi.Size; // Or CustomMinimumSize if Size is zero
-        var centerPos = (viewportSize - uiSize) / 2;
-        startGameUi.Position = centerPos;
-        AddChild(startGameUi);
-
+        // Get viewport size and center the UI
+        // var viewportSize = GetViewport().GetVisibleRect().Size;
+        // var centerPos = viewportSize / 2;
+        // startGameUi.Position = centerPos;
         // AddChild(startGameUi);
     }
 
@@ -37,7 +35,6 @@ public partial class UiManager : Control
 
     public void SetSelectionUi(Hex h)
     {
-
         if (selectionUi is not null) selectionUi.QueueFree();
         // selectionUI = selectionUiScene.Instantiate<SelectionUI>();
         // or
