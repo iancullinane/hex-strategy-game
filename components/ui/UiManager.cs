@@ -28,15 +28,6 @@ public partial class UiManager : Control
         startGameUiScene = ResourceLoader.Load<PackedScene>("components/ui/StartGameUi.tscn"); ;
 
         ShowStartGameUi();
-        // startGameUi = (StartGameUi)startGameUiScene.Instantiate();
-
-        // var viewportSize = GetViewport().GetVisibleRect().Size;
-        // var uiSize = startGameUi.Size; // Or CustomMinimumSize if Size is zero
-        // var centerPos = (viewportSize - uiSize) / 2;
-        // startGameUi.Position = centerPos;
-        // AddChild(startGameUi);
-
-        // AddChild(startGameUi);
     }
 
     public void ShowStartGameUi()
@@ -44,15 +35,10 @@ public partial class UiManager : Control
         if (startGameUi != null)
             startGameUi.QueueFree();
 
-        startGameUi = (StartGameUi)startGameUiScene.Instantiate();
+        startGameUi = startGameUiScene.Instantiate<StartGameUi>();
 
         // Connect the child signal to this class's signal
         startGameUi.StartGamePressed += () => EmitSignal(SignalName.StartGamePressed);
-        // var viewportSize = GetViewport().GetVisibleRect().Size;
-        // var uiSize = startGameUi.Size; // Or CustomMinimumSize if Size is zero
-        // var centerPos = (viewportSize - uiSize) / 2;
-        // startGameUi.Position = centerPos;
-        // Centering logic here if needed...
 
         AddChild(startGameUi);
     }
@@ -70,10 +56,7 @@ public partial class UiManager : Control
     {
 
         if (selectionUi is not null) selectionUi.QueueFree();
-        // selectionUI = selectionUiScene.Instantiate<SelectionUI>();
-        // or
-        // selectionUI = (SelectionUI) selectionUiScene.Instantiate();
-        selectionUi = (SelectionUi)selectionUiScene.Instantiate();
+        selectionUi = selectionUiScene.Instantiate<SelectionUi>();
         AddChild(selectionUi);
         selectionUi.SetHex(h);
     }

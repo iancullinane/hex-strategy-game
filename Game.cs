@@ -29,9 +29,6 @@ public partial class Game : Node
         Vector2 centerPos = map.MapToLocal(new Vector2I(map.width / 2, map.height / 2));
         camera.Position = centerPos;
 
-        // Connect the signal
-        uiManager.StartGamePressed += uiManager.HideStartGameUi;
-
         if (gameConfig.DebugMode)
         {
             GD.Print("Debug mode enabled");

@@ -15,9 +15,8 @@ script = ExtResource("1_80nbo")
 gameConfig = ExtResource("2_vef74")
 
 [node name="Background" type="Sprite2D" parent="."]
-visible = false
-position = Vector2(12697.7, 8553.25)
-scale = Vector2(7.73075, 7.73075)
+position = Vector2(3619, 3063)
+scale = Vector2(6.46945, 6.46945)
 texture = ExtResource("2_hve3p")
 
 [node name="TileMap" type="Node2D" parent="."]

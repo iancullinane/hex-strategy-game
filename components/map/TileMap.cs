@@ -151,7 +151,8 @@ public partial class TileMap : Node2D
         // Reference to uiManager contains the signal, tie the local SendHexData
         // method to uiManager, this will receive a hex from the ui selection
         this.SendHexData += uiManager.SetSelectionUi;
-
+        // Connect the signal
+        uiManager.StartGamePressed += uiManager.HideStartGameUi;
 
         // Create a city
         CreateCity(new Civilization("Test"), new Vector2I(height / 2, width / 2), "Test City");
