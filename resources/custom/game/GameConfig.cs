@@ -18,5 +18,7 @@ public partial class GameConfig : Resource
     [Export]
     public bool DebugMode { get; set; } = false;
 
-    // Add any other game-wide settings you need
+    [Export]
+    public string[] CivilizationNames { get; set; } = { "Boston" };
+
 }

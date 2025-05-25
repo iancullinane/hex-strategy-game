@@ -1,4 +1,5 @@
 using Godot;
+using System.Collections.Generic;
 
 
 public partial class Game : Node
@@ -8,31 +9,66 @@ public partial class Game : Node
     [Export]
     public GameConfig gameConfig;
 
+    [Export]
+    public NoiseConfig noiseConfig;
+
 
     // [Export]
     public UiManager uiManager;
 
+
+    // private TileMap tileMap;
+    private Camera camera;
+
+    private List<Civilization> civilizations;
+
+
     public override void _Ready()
     {
         uiManager = GetNode<UiManager>("CanvasLayer/NewUiManager");
+        camera = GetNode<Camera>("Camera");
+        // TODO: Center the camera
+        camera.Position = new Vector2I(50 / 2, 50 / 2);
 
-        GD.Print("Game ready");
-        Camera camera = GetNode<Camera>("Camera");
-        map = GetNode<TileMap>("TileMap");
+        PackedScene tileMapScene = ResourceLoader.Load<PackedScene>("res://scenes/tile_map.tscn");
+        map = tileMapScene.Instantiate<TileMap>();
 
-        // Use config values
-        GD.Print($"Read config for width: {gameConfig.MapWidth} and height: {gameConfig.MapHeight}");
-        map.width = gameConfig.MapWidth;
-        map.height = gameConfig.MapHeight;
+        map.SetupMap(gameConfig, noiseConfig, uiManager);
 
-        // Calculate center position
-        Vector2 centerPos = map.MapToLocal(new Vector2I(map.width / 2, map.height / 2));
-        camera.Position = centerPos;
+        AddChild(map);
+        GD.Print(uiManager);
+
+        uiManager.StartGamePressed += () => StartGame();
+
+
+        civilizations = new List<Civilization>();
+        foreach (string civName in gameConfig.CivilizationNames)
+        {
+            Civilization civ = new Civilization(civName);
+            civilizations.Add(civ);
+        }
+
 
         if (gameConfig.DebugMode)
         {
             GD.Print("Debug mode enabled");
         }
+    }
+
+    public void StartGame()
+    {
+        GD.Print("Starting game");
+        uiManager.HideStartGameUi();
+        map.GenerateTerrain();
+        map.GenerateResources();
+
+        foreach (Civilization civ in civilizations)
+        {
+            map.CreateCity(civ, map.GetRandomHex().coordinates, civ.name);
+        }
+
+        camera.SetBoundaries(map);
+        camera.CenterCamera();
     }
 
 

@@ -1,11 +1,8 @@
-[gd_scene load_steps=10 format=3 uid="uid://chaxhjuvnqegi"]
+[gd_scene load_steps=7 format=3 uid="uid://chaxhjuvnqegi"]
 
 [ext_resource type="Script" uid="uid://dqyurt4shygtu" path="res://Game.cs" id="1_80nbo"]
-[ext_resource type="Script" uid="uid://dxomqqyd4xwcp" path="res://components/map/TileMap.cs" id="2_feb5d"]
 [ext_resource type="Texture2D" uid="uid://gakigkw6iqog" path="res://assets/images/wooden_table.jpg" id="2_hve3p"]
 [ext_resource type="Resource" uid="uid://q60qd3o17apa" path="res://resources/custom/game/base_game_config.tres" id="2_vef74"]
-[ext_resource type="TileSet" uid="uid://bqc5g484obtd" path="res://resources/tiles/base_tileset.tres" id="3_feb5d"]
-[ext_resource type="TileSet" uid="uid://bp0alv0hmtfrn" path="res://resources/tiles/border_tileset.tres" id="4_fc0e3"]
 [ext_resource type="Resource" uid="uid://cc3odiu0tibss" path="res://resources/custom/map/base_noise_config.tres" id="4_j5wjh"]
 [ext_resource type="Script" uid="uid://ctev7rbvgs867" path="res://components/Camera.cs" id="5_7jktm"]
 [ext_resource type="Script" uid="uid://7su1nnwnw4lt" path="res://components/ui/UiManager.cs" id="10_hve3p"]
@@ -13,25 +10,12 @@
 [node name="Game" type="Node"]
 script = ExtResource("1_80nbo")
 gameConfig = ExtResource("2_vef74")
-
-[node name="Background" type="Sprite2D" parent="."]
-position = Vector2(3619, 3063)
-scale = Vector2(6.46945, 6.46945)
-texture = ExtResource("2_hve3p")
-
-[node name="TileMap" type="Node2D" parent="."]
-script = ExtResource("2_feb5d")
 noiseConfig = ExtResource("4_j5wjh")
 
-[node name="BaseLayer" type="TileMapLayer" parent="TileMap"]
-tile_set = ExtResource("3_feb5d")
-
-[node name="BorderLayer" type="TileMapLayer" parent="TileMap"]
-modulate = Color(1, 1, 1, 0.172549)
-tile_set = ExtResource("4_fc0e3")
-
-[node name="OverlayLayer" type="TileMapLayer" parent="TileMap"]
-tile_set = ExtResource("4_fc0e3")
+[node name="Background" type="Sprite2D" parent="."]
+position = Vector2(4886, 5620)
+scale = Vector2(6.46945, 6.46945)
+texture = ExtResource("2_hve3p")
 
 [node name="Camera" type="Camera2D" parent="."]
 position_smoothing_enabled = true

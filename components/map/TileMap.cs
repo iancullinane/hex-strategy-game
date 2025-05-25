@@ -117,8 +117,6 @@ public partial class TileMap : Node2D
 
     // [Export]
     // public int width = 60;
-
-    [Export]
     public NoiseConfig noiseConfig;
 
     NoiseMapFactory noiseMapFactory;
@@ -137,27 +135,48 @@ public partial class TileMap : Node2D
     {
         GD.Print($"Load resources and setup");
         cityScene = GD.Load<PackedScene>("res://scenes/city.tscn");
+        this.SendHexData += uiManager.SetSelectionUi;
 
-        SetupNodeRefs();
-        noiseMapFactory = new NoiseMapFactory(noiseConfig);
-        mapData = new Dictionary<Vector2I, Hex>();
-
-        GD.Print($"Creating map with width: {width} and height: {height}");
 
         InitializeTerrainTextures();
-        GenerateTerrain();
-        GenerateResources();
+        SetupNodeRefs();
+
+
+        // noiseMapFactory = new NoiseMapFactory(noiseConfig);
+        // mapData = new Dictionary<Vector2I, Hex>();
+
+        // GD.Print($"Creating map with width: {width} and height: {height}");
+
+        // InitializeTerrainTextures();
+        // GenerateTerrain();
+        // GenerateResources();
+
+
+
 
         // Reference to uiManager contains the signal, tie the local SendHexData
         // method to uiManager, this will receive a hex from the ui selection
-        this.SendHexData += uiManager.SetSelectionUi;
         // Connect the signal
-        uiManager.StartGamePressed += uiManager.HideStartGameUi;
+
 
         // Create a city
-        CreateCity(new Civilization("Test"), new Vector2I(height / 2, width / 2), "Test City");
+        // CreateCity(new Civilization("Test"), new Vector2I(height / 2, width / 2), "Test City");
 
     }
+
+
+    public void SetupMap(GameConfig config, NoiseConfig gameNoiseConfig, UiManager uiManager)
+    {
+        GD.Print($"Setting up map with width: {config.MapWidth} and height: {config.MapHeight}");
+        width = config.MapWidth;
+        height = config.MapHeight;
+        noiseConfig = gameNoiseConfig;
+        noiseMapFactory = new NoiseMapFactory(noiseConfig);
+        mapData = new Dictionary<Vector2I, Hex>();
+        this.uiManager = uiManager;
+    }
+
+
     private void SetupNodeRefs()
     {
         uiManager = GetNode<UiManager>("/root/Game/CanvasLayer/NewUiManager");
@@ -310,6 +329,7 @@ public partial class TileMap : Node2D
                 baseLayer.SetCell(new Vector2I(x, y), 0, terrainTextures[h.terrainType]);
             }
         }
+        GD.Print("Terrain generated");
     }
 
     public void GenerateResources()
@@ -362,6 +382,18 @@ public partial class TileMap : Node2D
         overlayLayer.SetCell(coords, 2, new Vector2I(0, 1));
         currentSelectedHex = coords;
         SendHexData?.Invoke(mapData[coords]);
+    }
+
+    public Hex GetRandomHex()
+    {
+        if (mapData.Count == 0)
+        {
+            return null;
+        }
+
+        Random random = new Random();
+        int index = random.Next(mapData.Count);
+        return mapData.ElementAt(index).Value;
     }
 
 

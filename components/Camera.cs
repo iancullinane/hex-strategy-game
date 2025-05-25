@@ -6,11 +6,11 @@ public partial class Camera : Camera2D
 {
 
     [Export]
-    int map_padding = 10;    
+    int map_padding = 10;
 
     [Export]
     float zoom_min = 0.1f;
-    
+
     [Export]
     float zoom_max = 2.0f;
 
@@ -29,13 +29,22 @@ public partial class Camera : Camera2D
     TileMap map;
     public override void _Ready()
     {
-        map = GetNode<TileMap>("../TileMap");
-        leftBound = ToGlobal(map.MapToLocal(new Vector2I(0,0))).X + map_padding;
+        if (map == null) return;
+    }
+
+    public void SetBoundaries(TileMap tileMap)
+    {
+        map = tileMap;
+        leftBound = ToGlobal(map.MapToLocal(new Vector2I(0, 0))).X + map_padding;
         rightBound = ToGlobal(map.MapToLocal(new Vector2I(map.width, 0))).X - map_padding;
         topBound = ToGlobal(map.MapToLocal(new Vector2I(0, 0))).Y + map_padding;
         bottomBound = ToGlobal(map.MapToLocal(new Vector2I(0, map.height))).Y - map_padding;
+    }
 
 
+    public void CenterCamera()
+    {
+        Position = map.MapToLocal(new Vector2I(map.width / 2, map.height / 2));
     }
 
     public override void _PhysicsProcess(double delta)
@@ -77,16 +86,19 @@ public partial class Camera : Camera2D
         {
             mouseWheelScrollingUp = false;
         }
-         if (Input.IsActionJustReleased("map_mouse_out"))
+        if (Input.IsActionJustReleased("map_mouse_out"))
         {
             mouseWheelScrollingDown = true;
         }
-                if (!Input.IsActionJustReleased("map_mouse_out"))
+        if (!Input.IsActionJustReleased("map_mouse_out"))
         {
             mouseWheelScrollingDown = false;
         }
 
-        
+
         Zoom = new Vector2(Mathf.Clamp(Zoom.X, zoom_min, zoom_max), Mathf.Clamp(Zoom.Y, zoom_min, zoom_max));
     }
 }
+
+
+// TODO: Function to move the camera to a position

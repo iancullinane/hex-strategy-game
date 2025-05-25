@@ -63,7 +63,6 @@ public partial class UiManager : Control
 
     public void HideStartGameUi()
     {
-        GD.Print("HideStartGameUi");
         if (startGameUi is not null)
         {
             startGameUi.QueueFree();

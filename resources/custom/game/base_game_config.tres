@@ -4,9 +4,10 @@
 
 [resource]
 script = ExtResource("1_ccwsq")
-MapWidth = 60
-MapHeight = 100
+MapWidth = 50
+MapHeight = 50
 CameraZoom = 1.0
 CameraOffset = Vector2(0, 0)
 DebugMode = false
+CivilizationNames = PackedStringArray("Boston")
 metadata/_custom_type_script = "uid://dp54jav053dwy"

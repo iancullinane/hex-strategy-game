@@ -1,0 +1,18 @@
+[gd_scene load_steps=4 format=3 uid="uid://fudc0lrtgat0"]
+
+[ext_resource type="Script" uid="uid://dxomqqyd4xwcp" path="res://components/map/TileMap.cs" id="1_dohrl"]
+[ext_resource type="TileSet" uid="uid://bqc5g484obtd" path="res://resources/tiles/base_tileset.tres" id="3_kvphj"]
+[ext_resource type="TileSet" uid="uid://bp0alv0hmtfrn" path="res://resources/tiles/border_tileset.tres" id="4_5ie0g"]
+
+[node name="TileMap" type="Node2D"]
+script = ExtResource("1_dohrl")
+
+[node name="BaseLayer" type="TileMapLayer" parent="."]
+tile_set = ExtResource("3_kvphj")
+
+[node name="BorderLayer" type="TileMapLayer" parent="."]
+modulate = Color(1, 1, 1, 0.172549)
+tile_set = ExtResource("4_5ie0g")
+
+[node name="OverlayLayer" type="TileMapLayer" parent="."]
+tile_set = ExtResource("4_5ie0g")
