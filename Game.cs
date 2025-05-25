@@ -10,10 +10,12 @@ public partial class Game : Node
 
 
     // [Export]
-    // public UiManager uiManager;
+    public UiManager uiManager;
 
     public override void _Ready()
     {
+        uiManager = GetNode<UiManager>("CanvasLayer/NewUiManager");
+
         GD.Print("Game ready");
         Camera camera = GetNode<Camera>("Camera");
         map = GetNode<TileMap>("TileMap");
@@ -27,7 +29,8 @@ public partial class Game : Node
         Vector2 centerPos = map.MapToLocal(new Vector2I(map.width / 2, map.height / 2));
         camera.Position = centerPos;
 
-
+        // Connect the signal
+        uiManager.StartGamePressed += uiManager.HideStartGameUi;
 
         if (gameConfig.DebugMode)
         {
