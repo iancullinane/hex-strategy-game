@@ -1,7 +1,7 @@
 [gd_resource type="FastNoiseLite" format=3 uid="uid://cvboanklqnjro"]
 
 [resource]
-noise_type = 0
+noise_type = 2
 frequency = 0.0111
 offset = Vector3(380.65, 0, 0)
 fractal_octaves = 10

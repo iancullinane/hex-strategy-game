@@ -1,15 +1,16 @@
-[gd_scene load_steps=7 format=3 uid="uid://chaxhjuvnqegi"]
+[gd_scene load_steps=8 format=3 uid="uid://chaxhjuvnqegi"]
 
 [ext_resource type="Script" uid="uid://dqyurt4shygtu" path="res://Game.cs" id="1_80nbo"]
+[ext_resource type="Resource" uid="uid://q60qd3o17apa" path="res://resources/custom/game/base_game_config.tres" id="2_eow3j"]
 [ext_resource type="Texture2D" uid="uid://gakigkw6iqog" path="res://assets/images/wooden_table.jpg" id="2_hve3p"]
-[ext_resource type="Resource" uid="uid://q60qd3o17apa" path="res://resources/custom/game/base_game_config.tres" id="2_vef74"]
 [ext_resource type="Resource" uid="uid://cc3odiu0tibss" path="res://resources/custom/map/base_noise_config.tres" id="4_j5wjh"]
 [ext_resource type="Script" uid="uid://ctev7rbvgs867" path="res://components/Camera.cs" id="5_7jktm"]
+[ext_resource type="AudioStream" uid="uid://8gc7p5qduib2" path="res://assets/audio/music/piano_one.mp3" id="6_ryrav"]
 [ext_resource type="Script" uid="uid://7su1nnwnw4lt" path="res://components/ui/UiManager.cs" id="10_hve3p"]
 
 [node name="Game" type="Node"]
 script = ExtResource("1_80nbo")
-gameConfig = ExtResource("2_vef74")
+gameConfig = ExtResource("2_eow3j")
 noiseConfig = ExtResource("4_j5wjh")
 
 [node name="Background" type="Sprite2D" parent="."]
@@ -37,3 +38,7 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 mouse_filter = 2
 script = ExtResource("10_hve3p")
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
+stream = ExtResource("6_ryrav")
+autoplay = true

@@ -326,7 +326,10 @@ public partial class TileMap : Node2D
             {
                 Hex h = mapData[new Vector2I(x, y)];
                 h.terrainType = TerrainType.ICE;
-                baseLayer.SetCell(new Vector2I(x, y), 0, terrainTextures[h.terrainType]);
+                baseLayer.SetCell(
+                    new Vector2I(x, y),
+                    0,
+                    terrainTextures[h.terrainType]);
             }
         }
         GD.Print("Terrain generated");
