@@ -7,6 +7,7 @@ public partial class City : Node2D
 
     // Base Info
     public string name;
+    public Color color;
     public Label label;
     public Sprite2D sprite;
 
@@ -24,16 +25,35 @@ public partial class City : Node2D
     public Civilization civ;
 
 
-    public void _Ready()
+    public override void _Ready()
     {
         // Get the map
         label = GetNode<Label>("Label");
         sprite = GetNode<Sprite2D>("Sprite2D");
-        label.Text = name;
         territory = new List<Hex>();
         borderTilePool = new List<Hex>();
 
-        // Get the center coordinates
+        label.Text = name;
+        sprite.Modulate = color;
+    }
 
+    public void AddTerritory(List<Hex> territoryToAdd)
+    {
+
+        foreach (Hex hex in territoryToAdd)
+        {
+            hex.ownerCity = this;
+        }
+        territory.AddRange(territoryToAdd);
+    }
+
+    public void SetCityName(string newName)
+    {
+        name = newName;
+    }
+
+    public void SetIconColor(Color newColor)
+    {
+        color = newColor;
     }
 }

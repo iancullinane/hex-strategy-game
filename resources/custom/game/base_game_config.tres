@@ -1,13 +1,38 @@
-[gd_resource type="Resource" script_class="GameConfig" load_steps=2 format=3 uid="uid://q60qd3o17apa"]
+[gd_resource type="Resource" script_class="GameConfig" load_steps=6 format=3 uid="uid://q60qd3o17apa"]
 
 [ext_resource type="Script" uid="uid://dp54jav053dwy" path="res://resources/custom/game/GameConfig.cs" id="1_ccwsq"]
+[ext_resource type="Script" uid="uid://c6ifsy4rbrt54" path="res://resources/custom/game/CivilizationConfig.cs" id="1_e2ptq"]
+
+[sub_resource type="Resource" id="Resource_sgpjx"]
+script = ExtResource("1_e2ptq")
+Name = "America"
+Color = Color(0.113725, 0.431373, 1, 1)
+IsPlayer = false
+CityNames = PackedStringArray("New York", "Boston", "Los Angeles")
+metadata/_custom_type_script = "uid://c6ifsy4rbrt54"
+
+[sub_resource type="Resource" id="Resource_e2ptq"]
+script = ExtResource("1_e2ptq")
+Name = "Russia"
+Color = Color(0.831373, 0, 0, 1)
+IsPlayer = false
+CityNames = PackedStringArray("Moscow", "Saint Petersburg", "Novosibirsk")
+metadata/_custom_type_script = "uid://c6ifsy4rbrt54"
+
+[sub_resource type="Resource" id="Resource_ihiaw"]
+script = ExtResource("1_e2ptq")
+Name = "China"
+Color = Color(0.972549, 0, 1, 1)
+IsPlayer = false
+CityNames = PackedStringArray("Shanghai", "Beijing", "Chongqing")
+metadata/_custom_type_script = "uid://c6ifsy4rbrt54"
 
 [resource]
 script = ExtResource("1_ccwsq")
-MapWidth = 50
-MapHeight = 50
-CameraZoom = 1.0
+MapWidth = 20
+MapHeight = 20
+CameraZoom = 20.0
 CameraOffset = Vector2(0, 0)
 DebugMode = false
-CivilizationNames = PackedStringArray("Boston")
+Civilizations = [SubResource("Resource_sgpjx"), SubResource("Resource_e2ptq"), SubResource("Resource_ihiaw")]
 metadata/_custom_type_script = "uid://dp54jav053dwy"

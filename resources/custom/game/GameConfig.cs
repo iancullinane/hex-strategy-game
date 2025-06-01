@@ -19,6 +19,7 @@ public partial class GameConfig : Resource
     public bool DebugMode { get; set; } = false;
 
     [Export]
-    public string[] CivilizationNames { get; set; } = { "Boston" };
+    public CivilizationConfig[] Civilizations { get; set; }
 
 }
+

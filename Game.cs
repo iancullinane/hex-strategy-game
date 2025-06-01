@@ -27,26 +27,28 @@ public partial class Game : Node
     {
         uiManager = GetNode<UiManager>("CanvasLayer/NewUiManager");
         camera = GetNode<Camera>("Camera");
-        // TODO: Center the camera
-        camera.Position = new Vector2I(50 / 2, 50 / 2);
+
 
         PackedScene tileMapScene = ResourceLoader.Load<PackedScene>("res://scenes/tile_map.tscn");
         map = tileMapScene.Instantiate<TileMap>();
 
+        // civilizations = new List<Civilization>();
+        // foreach (CivilizationConfig civConfig in gameConfig.Civilizations)
+        // {
+        //     Civilization civ = new Civilization(civConfig.Name, civConfig.Color);
+        //     civilizations.Add(civ);
+        // }
+
+
+
+
         map.SetupMap(gameConfig, noiseConfig, uiManager);
 
         AddChild(map);
-        GD.Print(uiManager);
 
         uiManager.StartGamePressed += () => StartGame();
 
 
-        civilizations = new List<Civilization>();
-        foreach (string civName in gameConfig.CivilizationNames)
-        {
-            Civilization civ = new Civilization(civName);
-            civilizations.Add(civ);
-        }
 
 
         if (gameConfig.DebugMode)
@@ -58,13 +60,30 @@ public partial class Game : Node
     public void StartGame()
     {
         GD.Print("Starting game");
+        GD.Print($"With {gameConfig.Civilizations.Length} civilizations");
         uiManager.HideStartGameUi();
         map.GenerateTerrain();
         map.GenerateResources();
 
+
+
+
+        civilizations = new List<Civilization>();
+        for (int i = 0; i < gameConfig.Civilizations.Length; i++)
+        {
+            GD.Print($"Creating civilization {i}: {gameConfig.Civilizations[i].Name}");
+            Civilization civ = new Civilization(i, gameConfig.Civilizations[i]);
+            civilizations.Add(civ);
+
+        }
+
+        List<Vector2I> startingLocations = map.GenerateCivStartingLocations(civilizations.Count);
+
+
         foreach (Civilization civ in civilizations)
         {
-            map.CreateCity(civ, map.GetRandomHex().coordinates, civ.name);
+            map.CreateCity(civ, startingLocations[0], civ.name);
+            startingLocations.RemoveAt(0);
         }
 
         camera.SetBoundaries(map);

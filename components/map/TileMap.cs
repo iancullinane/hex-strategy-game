@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Data.Common;
 using System.Linq;
 
 public enum TerrainType
@@ -13,6 +14,7 @@ public enum TerrainType
     SHALLOW_WATER,
     BEACH,
     FOREST,
+    CIV_COLOR_BASE,
 }
 
 /// <summary>
@@ -37,9 +39,14 @@ public class Hex
     public int food { get; set; }
     public int production { get; set; }
 
+    public City ownerCity;
+
+    public bool isCityCenter = false;
+
     public Hex(Vector2I coordinates)
     {
         this.coordinates = coordinates;
+        ownerCity = null;
     }
 
     public override string ToString()
@@ -97,37 +104,35 @@ public partial class TileMap : Node2D
     // ------------------------------------------------------------
     PackedScene cityScene;
 
+    // Map graphics
+    // ------------------------------------------------------------
+    TileMapLayer baseLayer, civLayer, borderLayer, overlayLayer;
+    Dictionary<TerrainType, Vector2I> terrainTextures;
 
     // Ui
+    Vector2I currentSelectedHex = new Vector2I(-1, -1);
     // ------------------------------------------------------------
     UiManager uiManager;
 
+    // Signals
+    // ------------------------------------------------------------
     public delegate void HexSelectedEventHandler(Hex h);
     public event HexSelectedEventHandler SendHexData;
-    Vector2I currentSelectedHex = new Vector2I(-1, -1);
 
     // Map settings
     // ------------------------------------------------------------
+    public int height = 10;
+    public int width = 10;
 
-
-    public int height = 100;
-    public int width = 60;
-    // [Export]
-    // public int height = 100;
-
-    // [Export]
-    // public int width = 60;
     public NoiseConfig noiseConfig;
 
     NoiseMapFactory noiseMapFactory;
 
-    // Map data
+    // Game data
     Dictionary<Vector2I, Hex> mapData;
 
-    // Map graphics
-    // ------------------------------------------------------------
-    TileMapLayer baseLayer, borderLayer, overlayLayer;
-    Dictionary<TerrainType, Vector2I> terrainTextures;
+    public Dictionary<Vector2I, City> cities;
+    public List<Civilization> civs;
 
 
 
@@ -140,34 +145,15 @@ public partial class TileMap : Node2D
 
         InitializeTerrainTextures();
         SetupNodeRefs();
-
-
-        // noiseMapFactory = new NoiseMapFactory(noiseConfig);
-        // mapData = new Dictionary<Vector2I, Hex>();
-
-        // GD.Print($"Creating map with width: {width} and height: {height}");
-
-        // InitializeTerrainTextures();
-        // GenerateTerrain();
-        // GenerateResources();
-
-
-
-
-        // Reference to uiManager contains the signal, tie the local SendHexData
-        // method to uiManager, this will receive a hex from the ui selection
-        // Connect the signal
-
-
-        // Create a city
-        // CreateCity(new Civilization("Test"), new Vector2I(height / 2, width / 2), "Test City");
-
     }
 
 
     public void SetupMap(GameConfig config, NoiseConfig gameNoiseConfig, UiManager uiManager)
     {
         GD.Print($"Setting up map with width: {config.MapWidth} and height: {config.MapHeight}");
+
+        cities = new Dictionary<Vector2I, City>();
+
         width = config.MapWidth;
         height = config.MapHeight;
         noiseConfig = gameNoiseConfig;
@@ -182,51 +168,148 @@ public partial class TileMap : Node2D
         uiManager = GetNode<UiManager>("/root/Game/CanvasLayer/NewUiManager");
         // uiManager = GetNode<UiManager>("/root/Game/CanvasLayer/UiManager");
         baseLayer = GetNode<TileMapLayer>("BaseLayer");
+        civLayer = GetNode<TileMapLayer>("CivBordersLayer");
         borderLayer = GetNode<TileMapLayer>("BorderLayer");
         overlayLayer = GetNode<TileMapLayer>("OverlayLayer");
     }
 
-    private void InitializeTerrainTextures()
+    // City Generation
+    // ------------------------------------------------------------
+
+    public List<Vector2I> GenerateCivStartingLocations(int numLocations)
     {
-        terrainTextures = new Dictionary<TerrainType, Vector2I>
+        List<Vector2I> locations = new List<Vector2I>();
+        List<Vector2I> plainsTiles = new List<Vector2I>();
+
+        ForEachHex((x, y, hex) =>
         {
-            {TerrainType.PLAINS, new Vector2I(0, 0)},
-            {TerrainType.WATER, new Vector2I(1, 0)},
-            {TerrainType.DESERT, new Vector2I(0, 1)},
-            {TerrainType.MOUNTAIN, new Vector2I(1, 1)},
-            {TerrainType.SHALLOW_WATER, new Vector2I(1, 2)},
-            {TerrainType.BEACH, new Vector2I(0, 2)},
-            {TerrainType.FOREST, new Vector2I(1, 3)},
-            {TerrainType.ICE, new Vector2I(0, 3)},
-       };
+            if (hex.terrainType == TerrainType.PLAINS)
+            {
+                plainsTiles.Add(new Vector2I(x, y));
+            }
+        });
+
+        Random r = new Random();
+        for (int i = 0; i < numLocations; i++)
+        {
+            Vector2I coords = new Vector2I();
+
+            bool valid = false;
+            int counter = 0;
+
+            while (!valid && counter < 10000)
+            {
+                coords = plainsTiles[r.Next(plainsTiles.Count)];
+                valid = IsValidLocation(coords, locations);
+                counter++;
+            }
+
+            plainsTiles.Remove(coords);
+            foreach (Hex h in GetSurroundingTiles(coords))
+            {
+                foreach (Hex j in GetSurroundingTiles(h.coordinates))
+                {
+                    foreach (Hex k in GetSurroundingTiles(j.coordinates))
+                    {
+                        plainsTiles.Remove(h.coordinates);
+                        plainsTiles.Remove(j.coordinates);
+                        plainsTiles.Remove(k.coordinates);
+                    }
+                }
+
+            }
+
+            locations.Add(coords);
+        }
+
+        return locations;
+    }
+
+    private bool IsValidLocation(Vector2I coord, List<Vector2I> locations)
+    {
+        if (coord.X < 3 || coord.X > width - 3 ||
+            coord.Y < 3 || coord.X > width - 3)
+        {
+            return false;
+        }
+
+        foreach (Vector2I location in locations)
+        {
+            if (Math.Abs(coord.X - location.X) <= 20 &&
+                Math.Abs(coord.Y - location.Y) <= 20)
+            {
+                return false;
+            }
+        }
+
+        return true;
     }
 
 
-    // City Generation
-    // ------------------------------------------------------------
-    public void CreateCity(Civilization civ, Vector2I coords, string name)
+
+
+    public void CreateCity(Civilization civ, Vector2I cityCoords, string name)
     {
         City city = cityScene.Instantiate() as City;
         city.map = this;
         civ.cities.Add(city);
         city.civ = civ;
 
+        city.SetCityName(name);
+        city.SetIconColor(civ.color);
         AddChild(city);
+        city.centerCoordinates = cityCoords;
+        mapData[cityCoords].isCityCenter = true;
+        city.Position = baseLayer.MapToLocal(cityCoords);
 
-        // Set Color of icon
-        // Set the city name
-        // Set the coordinates of the city (map & world)
-        city.centerCoordinates = coords;
-        city.Position = baseLayer.MapToLocal(coords);
-        // Adding territory
-        // populate borders
+        // Add the city's center tile
+        city.AddTerritory(new List<Hex> { mapData[cityCoords] });
+        // // Add a ring of tiles around the city
+        List<Hex> surroundingTiles = GetSurroundingTiles(cityCoords);
+
+        foreach (Hex hex in surroundingTiles)
+        {
+            if (hex.ownerCity == null)
+            {
+                hex.ownerCity = city;
+                city.AddTerritory(new List<Hex> { hex });
+            }
+        }
+
+        UpdateCivTerritoryMap(civ);
+
+        cities[cityCoords] = city;
+    }
+
+    public void UpdateCivTerritoryMap(Civilization civ)
+    {
+        foreach (City c in civ.cities)
+        {
+            foreach (Hex h in c.territory)
+            {
+                civLayer.SetCell(h.coordinates, 0, terrainTextures[TerrainType.CIV_COLOR_BASE], civ.territoryColorAltTileId);
+            }
+        }
+    }
+
+    public List<Hex> GetSurroundingTiles(Vector2I coords)
+    {
+        List<Hex> surroundingTiles = new List<Hex>();
+
+        foreach (Vector2I coord in baseLayer.GetSurroundingCells(coords))
+        {
+            if (HexInBounds(coord))
+            {
+                surroundingTiles.Add(mapData[coord]);
+            }
+        }
+
+        return surroundingTiles;
     }
 
 
 
-
-
-    // Terrain Generation
+    // Generators
     // ------------------------------------------------------------
 
 
@@ -303,7 +386,7 @@ public partial class TileMap : Node2D
 
 
 
-                baseLayer.SetCell(new Vector2I(x, y), 0, terrainTextures[h.terrainType]);
+                baseLayer.SetCell(new Vector2I(x, y), 1, terrainTextures[h.terrainType]);
                 borderLayer.SetCell(new Vector2I(x, y), 2, new Vector2I(0, 0));
             }
 
@@ -345,7 +428,15 @@ public partial class TileMap : Node2D
     }
 
 
+    public void GenerateCivilizations(List<Civilization> civs)
+    {
+        List<Vector2I> startingLocations = GenerateCivStartingLocations(civs.Count);
 
+        // for (int i = 0; i < civs.Count; i++)
+        // {
+        //     id = i + 1
+        // }
+    }
 
     // Utils
     // ------------------------------------------------------------
@@ -375,6 +466,13 @@ public partial class TileMap : Node2D
         uiManager.HideAllPopups();
     }
 
+    public bool HexInBounds(Vector2I coords)
+    {
+        return (coords.X >= 0 && coords.X < width &&
+                coords.Y >= 0 && coords.Y < height);
+    }
+
+
     public void SetHexSelection(Vector2I coords)
     {
         if (currentSelectedHex == coords)
@@ -397,6 +495,42 @@ public partial class TileMap : Node2D
         Random random = new Random();
         int index = random.Next(mapData.Count);
         return mapData.ElementAt(index).Value;
+    }
+
+
+    // Graphics
+    // ------------------------------------------------------------
+    private void InitializeTerrainTextures()
+    {
+        terrainTextures = new Dictionary<TerrainType, Vector2I>
+        {
+            {TerrainType.PLAINS, new Vector2I(0, 0)},
+            {TerrainType.WATER, new Vector2I(1, 0)},
+            {TerrainType.DESERT, new Vector2I(0, 1)},
+            {TerrainType.MOUNTAIN, new Vector2I(1, 1)},
+            {TerrainType.SHALLOW_WATER, new Vector2I(1, 2)},
+            {TerrainType.BEACH, new Vector2I(0, 2)},
+            {TerrainType.FOREST, new Vector2I(1, 3)},
+            {TerrainType.ICE, new Vector2I(0, 3)},
+            {TerrainType.CIV_COLOR_BASE, new Vector2I(0, 3)},
+       };
+    }
+
+
+
+    public void ForEachHex(Action<int, int, Hex> action)
+    {
+        for (int x = 0; x < width; x++)
+        {
+            for (int y = 0; y < height; y++)
+            {
+                var coords = new Vector2I(x, y);
+                if (mapData.TryGetValue(coords, out Hex hex))
+                {
+                    action(x, y, hex);
+                }
+            }
+        }
     }
 
 
