@@ -10,7 +10,7 @@ script = ExtResource("1_dohrl")
 [node name="BaseLayer" type="TileMapLayer" parent="."]
 tile_set = ExtResource("3_kvphj")
 
-[node name="CivBordersLayer" type="TileMapLayer" parent="."]
+[node name="CivLayer" type="TileMapLayer" parent="."]
 modulate = Color(1, 1, 1, 0.505882)
 tile_set = ExtResource("3_kvphj")
 

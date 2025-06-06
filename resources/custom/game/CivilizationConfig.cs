@@ -9,7 +9,6 @@ public partial class CivilizationConfig : Resource
     [Export]
     public Color Color { get; set; }
 
-    [Export]
     public bool IsPlayer { get; set; }
 
     public int Id { get; set; }

@@ -1,0 +1,48 @@
+[gd_scene load_steps=2 format=3 uid="uid://che6krjlra200"]
+
+[ext_resource type="Script" uid="uid://b0uhygaf5wpso" path="res://components/ui/GeneralUi.cs" id="1_77p6x"]
+
+[node name="GeneralUI" type="Panel"]
+anchors_preset = -1
+anchor_left = 0.774
+anchor_top = 0.745
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_77p6x")
+
+[node name="Container" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="LabelContainer" type="MarginContainer" parent="Container"]
+layout_mode = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="TurnLabel" type="Label" parent="Container/LabelContainer"]
+layout_mode = 2
+size_flags_vertical = 6
+text = "Turn"
+
+[node name="ButtonContainer" type="MarginContainer" parent="Container"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 5.0
+theme_override_constants/margin_left = 30
+theme_override_constants/margin_top = 30
+theme_override_constants/margin_right = 30
+theme_override_constants/margin_bottom = 30
+
+[node name="EndTurnButton" type="Button" parent="Container/ButtonContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 5.0
+text = "Next Turn"

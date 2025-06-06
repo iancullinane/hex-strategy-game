@@ -109,6 +109,8 @@ public partial class TileMap : Node2D
     TileMapLayer baseLayer, civLayer, borderLayer, overlayLayer;
     Dictionary<TerrainType, Vector2I> terrainTextures;
 
+    TileSetAtlasSource terrainAtlas;
+
     // Ui
     Vector2I currentSelectedHex = new Vector2I(-1, -1);
     // ------------------------------------------------------------
@@ -118,6 +120,11 @@ public partial class TileMap : Node2D
     // ------------------------------------------------------------
     public delegate void HexSelectedEventHandler(Hex h);
     public event HexSelectedEventHandler SendHexData;
+
+    [Signal]
+    public delegate void SendCityUiInfoEventHandler(City c);
+
+
 
     // Map settings
     // ------------------------------------------------------------
@@ -132,16 +139,14 @@ public partial class TileMap : Node2D
     Dictionary<Vector2I, Hex> mapData;
 
     public Dictionary<Vector2I, City> cities;
-    public List<Civilization> civs;
-
-
+    public List<Civilization> civilizations;
 
     public override void _Ready()
     {
         GD.Print($"Load resources and setup");
         cityScene = GD.Load<PackedScene>("res://scenes/city.tscn");
         this.SendHexData += uiManager.SetSelectionUi;
-
+        uiManager.EndTurn += ProcessTurn;
 
         InitializeTerrainTextures();
         SetupNodeRefs();
@@ -168,9 +173,11 @@ public partial class TileMap : Node2D
         uiManager = GetNode<UiManager>("/root/Game/CanvasLayer/NewUiManager");
         // uiManager = GetNode<UiManager>("/root/Game/CanvasLayer/UiManager");
         baseLayer = GetNode<TileMapLayer>("BaseLayer");
-        civLayer = GetNode<TileMapLayer>("CivBordersLayer");
+        civLayer = GetNode<TileMapLayer>("CivLayer");
         borderLayer = GetNode<TileMapLayer>("BorderLayer");
         overlayLayer = GetNode<TileMapLayer>("OverlayLayer");
+
+        terrainAtlas = civLayer.TileSet.GetSource(0) as TileSetAtlasSource;
     }
 
     // City Generation
@@ -245,9 +252,6 @@ public partial class TileMap : Node2D
         return true;
     }
 
-
-
-
     public void CreateCity(Civilization civ, Vector2I cityCoords, string name)
     {
         City city = cityScene.Instantiate() as City;
@@ -265,7 +269,7 @@ public partial class TileMap : Node2D
         // Add the city's center tile
         city.AddTerritory(new List<Hex> { mapData[cityCoords] });
         // // Add a ring of tiles around the city
-        List<Hex> surroundingTiles = GetSurroundingTiles(cityCoords);
+        List<Hex> surroundingTiles = GetRandomSurroundingTile(cityCoords);
 
         foreach (Hex hex in surroundingTiles)
         {
@@ -275,7 +279,6 @@ public partial class TileMap : Node2D
                 city.AddTerritory(new List<Hex> { hex });
             }
         }
-
         UpdateCivTerritoryMap(civ);
 
         cities[cityCoords] = city;
@@ -307,6 +310,16 @@ public partial class TileMap : Node2D
         return surroundingTiles;
     }
 
+    public List<Hex> GetRandomSurroundingTile(Vector2I coords)
+    {
+        List<Hex> surroundingTiles = GetSurroundingTiles(coords);
+        if (surroundingTiles.Count == 0)
+            return new List<Hex>();
+
+        Random random = new Random();
+        int index = random.Next(surroundingTiles.Count);
+        return new List<Hex> { surroundingTiles[index] };
+    }
 
 
     // Generators
@@ -428,14 +441,29 @@ public partial class TileMap : Node2D
     }
 
 
-    public void GenerateCivilizations(List<Civilization> civs)
+    public void GenerateCivilizations(CivilizationConfig[] civConfigs)
     {
-        List<Vector2I> startingLocations = GenerateCivStartingLocations(civs.Count);
+        List<Vector2I> startingLocations = GenerateCivStartingLocations(civConfigs.Length);
 
-        // for (int i = 0; i < civs.Count; i++)
-        // {
-        //     id = i + 1
-        // }
+        civilizations = new List<Civilization>();
+        for (int i = 0; i < civConfigs.Length; i++)
+        {
+            Civilization civ = new Civilization(i, civConfigs[i]);
+            civilizations.Add(civ);
+
+        }
+
+        foreach (Civilization civ in civilizations)
+        {
+
+            int altTileId = terrainAtlas.CreateAlternativeTile(terrainTextures[TerrainType.CIV_COLOR_BASE]);
+            terrainAtlas.GetTileData(terrainTextures[TerrainType.CIV_COLOR_BASE], altTileId).Modulate = civ.color;
+
+            civ.territoryColorAltTileId = altTileId;
+
+            CreateCity(civ, startingLocations[0], civ.GetNextCityName());
+            startingLocations.RemoveAt(0);
+        }
     }
 
     // Utils
@@ -449,6 +477,21 @@ public partial class TileMap : Node2D
         return baseLayer.MapToLocal(coords);
     }
 
+
+    // 
+    // 
+    // 
+
+    public void ProcessTurn()
+    {
+        GD.Print("Processing turn");
+    }
+
+
+    /// <summary>
+    /// Converts the current global mouse position to map coordinates
+    /// </summary>
+    /// <returns>The map coordinates (Vector2I) corresponding to the current mouse position</returns>
     public Vector2I GetMapPosition()
     {
         return baseLayer.LocalToMap(ToLocal(GetGlobalMousePosition()));
@@ -482,6 +525,13 @@ public partial class TileMap : Node2D
         overlayLayer.SetCell(currentSelectedHex, -1);
         overlayLayer.SetCell(coords, 2, new Vector2I(0, 1));
         currentSelectedHex = coords;
+
+        if (cities.ContainsKey(coords))
+        {
+            EmitSignal(SignalName.SendCityUiInfo, cities[coords]);
+            return;
+        }
+
         SendHexData?.Invoke(mapData[coords]);
     }
 
@@ -532,6 +582,15 @@ public partial class TileMap : Node2D
             }
         }
     }
+
+
+    public Civilization GetCiv(int id)
+    {
+        return civilizations.FirstOrDefault(c => c.id == id);
+    }
+
+
+
 
 
 }

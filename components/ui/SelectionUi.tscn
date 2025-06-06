@@ -1,8 +1,8 @@
 [gd_scene load_steps=4 format=3 uid="uid://bafmbsi6ciblu"]
 
-[ext_resource type="LabelSettings" uid="uid://b8c776d8ru26u" path="res://resources/ui_settings/terrain_ui_labels.tres" id="1_6gob3"]
-[ext_resource type="Script" uid="uid://cq333c8fkb2k6" path="res://components/ui/SelectionUi.cs" id="1_nhdfg"]
-[ext_resource type="Texture2D" uid="uid://deb2cpd6rpq66" path="res://assets/images/terrain_graphics/plains.jpg" id="2_bmb8g"]
+[ext_resource type="Script" uid="uid://cq333c8fkb2k6" path="res://components/ui/SelectionUi.cs" id="1_adhdg"]
+[ext_resource type="Texture2D" uid="uid://deb2cpd6rpq66" path="res://assets/images/terrain_graphics/plains.jpg" id="2_w72oh"]
+[ext_resource type="LabelSettings" uid="uid://b8c776d8ru26u" path="res://resources/ui_settings/terrain_ui_labels.tres" id="3_brj6b"]
 
 [node name="SelectionUi" type="Panel"]
 custom_minimum_size = Vector2(500, 400)
@@ -12,7 +12,7 @@ offset_right = 504.0
 offset_bottom = 404.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
-script = ExtResource("1_nhdfg")
+script = ExtResource("1_adhdg")
 metadata/_edit_group_ = true
 
 [node name="Box" type="VBoxContainer" parent="."]
@@ -28,7 +28,7 @@ grow_vertical = 2
 [node name="TerrainImage" type="TextureRect" parent="Box"]
 layout_mode = 2
 size_flags_vertical = 3
-texture = ExtResource("2_bmb8g")
+texture = ExtResource("2_w72oh")
 expand_mode = 1
 stretch_mode = 1
 
@@ -38,14 +38,14 @@ layout_mode = 2
 [node name="TypeLabel" type="Label" parent="Box/Body"]
 layout_mode = 2
 text = "Type"
-label_settings = ExtResource("1_6gob3")
+label_settings = ExtResource("3_brj6b")
 
 [node name="FoodLabel" type="Label" parent="Box/Body"]
 layout_mode = 2
 text = "Food"
-label_settings = ExtResource("1_6gob3")
+label_settings = ExtResource("3_brj6b")
 
 [node name="ProductionLabel" type="Label" parent="Box/Body"]
 layout_mode = 2
 text = "Labor"
-label_settings = ExtResource("1_6gob3")
+label_settings = ExtResource("3_brj6b")

@@ -2,6 +2,7 @@ using Godot;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
+using System.Linq;
 
 public partial class Civilization
 {
@@ -22,13 +23,25 @@ public partial class Civilization
 
     public Civilization(int id, CivilizationConfig civConfig)
     {
+        this.isPlayer = civConfig.IsPlayer;
         this.id = id;
         this.name = civConfig.Name;
         this.color = civConfig.Color;
-        this.isPlayer = civConfig.IsPlayer;
         this.cityNames = civConfig.CityNames;
 
         cities = new List<City>();
+    }
+
+    public string GetNextCityName()
+    {
+        if (cityNames == null || cityNames.Length == 0)
+        {
+            return "New City";
+        }
+
+        string nextName = cityNames[0];
+        cityNames = cityNames.Skip(1).ToArray();
+        return nextName;
     }
 
 }

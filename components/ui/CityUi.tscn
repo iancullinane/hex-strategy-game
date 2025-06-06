@@ -1,0 +1,61 @@
+[gd_scene load_steps=6 format=3 uid="uid://rxh1d15byxb5"]
+
+[ext_resource type="Script" uid="uid://cyh6rgrhf6doa" path="res://components/ui/CityUi.cs" id="1_aewv4"]
+[ext_resource type="Texture2D" uid="uid://dpb20fbv6hge" path="res://assets/images/terrain_graphics/city_painting.jpg" id="1_v2dwm"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_v2dwm"]
+font_size = 39
+
+[sub_resource type="LabelSettings" id="LabelSettings_qx8m5"]
+font_size = 30
+
+[sub_resource type="LabelSettings" id="LabelSettings_aewv4"]
+font_size = 30
+
+[node name="CityUi" type="Panel"]
+custom_minimum_size = Vector2(500, 648)
+offset_right = 500.0
+offset_bottom = 1199.0
+script = ExtResource("1_aewv4")
+
+[node name="Box" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_right = -0.0373993
+offset_bottom = -0.049099
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TerrainImage" type="TextureRect" parent="Box"]
+layout_mode = 2
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.5
+texture = ExtResource("1_v2dwm")
+expand_mode = 1
+stretch_mode = 1
+
+[node name="Body" type="VBoxContainer" parent="Box"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="NameLabel" type="Label" parent="Box/Body"]
+layout_mode = 2
+text = "CIty Name"
+label_settings = SubResource("LabelSettings_v2dwm")
+
+[node name="PopulationLabel" type="Label" parent="Box/Body"]
+layout_mode = 2
+text = "Population"
+label_settings = SubResource("LabelSettings_qx8m5")
+
+[node name="ProductionLabel" type="Label" parent="Box/Body"]
+layout_mode = 2
+text = "Production"
+label_settings = SubResource("LabelSettings_aewv4")
+
+[node name="FoodLabel" type="Label" parent="Box/Body"]
+layout_mode = 2
+text = "Production"
+label_settings = SubResource("LabelSettings_aewv4")

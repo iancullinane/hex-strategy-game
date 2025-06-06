@@ -20,7 +20,10 @@ public partial class Game : Node
     // private TileMap tileMap;
     private Camera camera;
 
-    private List<Civilization> civilizations;
+    [Export]
+    public CivilizationConfig playerCivilizationConfig;
+
+
 
 
     public override void _Ready()
@@ -32,15 +35,17 @@ public partial class Game : Node
         PackedScene tileMapScene = ResourceLoader.Load<PackedScene>("res://scenes/tile_map.tscn");
         map = tileMapScene.Instantiate<TileMap>();
 
-        // civilizations = new List<Civilization>();
-        // foreach (CivilizationConfig civConfig in gameConfig.Civilizations)
-        // {
-        //     Civilization civ = new Civilization(civConfig.Name, civConfig.Color);
-        //     civilizations.Add(civ);
-        // }
+        map.SendCityUiInfo += uiManager.SetCityUi;
 
 
-
+        if (playerCivilizationConfig != null)
+        {
+            var newCivConfigs = new CivilizationConfig[gameConfig.Civilizations.Length + 1];
+            newCivConfigs[0] = playerCivilizationConfig;
+            newCivConfigs[0].IsPlayer = true;
+            gameConfig.Civilizations.CopyTo(newCivConfigs, 1);
+            gameConfig.Civilizations = newCivConfigs;
+        }
 
         map.SetupMap(gameConfig, noiseConfig, uiManager);
 
@@ -62,32 +67,18 @@ public partial class Game : Node
         GD.Print("Starting game");
         GD.Print($"With {gameConfig.Civilizations.Length} civilizations");
         uiManager.HideStartGameUi();
+        GD.Print("Showing general ui");
+        uiManager.ShowGeneralUi();
         map.GenerateTerrain();
         map.GenerateResources();
 
-
-
-
-        civilizations = new List<Civilization>();
-        for (int i = 0; i < gameConfig.Civilizations.Length; i++)
-        {
-            GD.Print($"Creating civilization {i}: {gameConfig.Civilizations[i].Name}");
-            Civilization civ = new Civilization(i, gameConfig.Civilizations[i]);
-            civilizations.Add(civ);
-
-        }
-
-        List<Vector2I> startingLocations = map.GenerateCivStartingLocations(civilizations.Count);
-
-
-        foreach (Civilization civ in civilizations)
-        {
-            map.CreateCity(civ, startingLocations[0], civ.name);
-            startingLocations.RemoveAt(0);
-        }
+        map.GenerateCivilizations(gameConfig.Civilizations);
 
         camera.SetBoundaries(map);
-        camera.CenterCamera();
+        Vector2I playerStartLocation = map.GetCiv(0).cities[0].centerCoordinates;
+        camera.MoveTo(playerStartLocation);
+
+
     }
 
 
@@ -114,7 +105,12 @@ public partial class Game : Node
         bool coordsInBounds = selectedCoords.X >= 0 && selectedCoords.X < map.width &&
                              selectedCoords.Y >= 0 && selectedCoords.Y < map.height;
 
-        if (!coordsInBounds) return;
+        if (!coordsInBounds)
+        {
+            map.ClearHexSelection();
+            return;
+        }
+
 
         map.SetHexSelection(selectedCoords);
         Hex selectedHex = map.GetHexAtMapPosition(selectedCoords);

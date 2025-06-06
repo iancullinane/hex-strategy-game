@@ -41,6 +41,11 @@ public partial class Camera : Camera2D
         bottomBound = ToGlobal(map.MapToLocal(new Vector2I(0, map.height))).Y - map_padding;
     }
 
+    public void MoveTo(Vector2I position)
+    {
+        Position = map.MapToLocal(position);
+    }
+
 
     public void CenterCamera()
     {
