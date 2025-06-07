@@ -32,6 +32,16 @@ public partial class Civilization
         cities = new List<City>();
     }
 
+
+    public void ProcessTurn()
+    {
+        foreach (City city in cities)
+        {
+            city.ProcessTurn();
+        }
+    }
+
+
     public string GetNextCityName()
     {
         if (cityNames == null || cityNames.Length == 0)

@@ -67,7 +67,6 @@ public partial class Game : Node
         GD.Print("Starting game");
         GD.Print($"With {gameConfig.Civilizations.Length} civilizations");
         uiManager.HideStartGameUi();
-        GD.Print("Showing general ui");
         uiManager.ShowGeneralUi();
         map.GenerateTerrain();
         map.GenerateResources();

@@ -206,6 +206,11 @@ public partial class TileMap : Node2D
 
             while (!valid && counter < 10000)
             {
+                if (plainsTiles.Count == 0)
+                {
+                    GD.PrintErr("No plains tiles were generated");
+                    break;
+                }
                 coords = plainsTiles[r.Next(plainsTiles.Count)];
                 valid = IsValidLocation(coords, locations);
                 counter++;
@@ -484,7 +489,10 @@ public partial class TileMap : Node2D
 
     public void ProcessTurn()
     {
-        GD.Print("Processing turn");
+        foreach (Civilization civ in civilizations)
+        {
+            civ.ProcessTurn();
+        }
     }
 
 

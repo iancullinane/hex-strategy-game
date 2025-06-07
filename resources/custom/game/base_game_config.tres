@@ -7,7 +7,7 @@
 script = ExtResource("1_e2ptq")
 Name = "America"
 Color = Color(0.113725, 0.431373, 1, 1)
-CityNames = PackedStringArray("New York", "Boston", "Los Angeles")
+CityNames = PackedStringArray("Ellliette", "Ian", "Llew")
 metadata/_custom_type_script = "uid://c6ifsy4rbrt54"
 
 [sub_resource type="Resource" id="Resource_e2ptq"]
@@ -26,8 +26,8 @@ metadata/_custom_type_script = "uid://c6ifsy4rbrt54"
 
 [resource]
 script = ExtResource("1_ccwsq")
-MapWidth = 40
-MapHeight = 40
+MapWidth = 50
+MapHeight = 50
 CameraZoom = 20.0
 CameraOffset = Vector2(0, 0)
 DebugMode = false
