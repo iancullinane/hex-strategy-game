@@ -23,6 +23,9 @@ public partial class Camera : Camera2D
     bool mouseWheelScrollingUp = false;
     bool mouseWheelScrollingDown = false;
 
+    bool isDragging = false;
+    Vector2 dragLastMousePos;
+
     // map boundaries
     float leftBound, rightBound, topBound, bottomBound;
 
@@ -72,6 +75,27 @@ public partial class Camera : Camera2D
             Position += new Vector2(0, velocity);
         }
 
+        // Mouse Drag Panning
+        if (Input.IsActionPressed("map_pan"))
+        {
+            Vector2 mousePos = GetViewport().GetMousePosition();
+            if (!isDragging)
+            {
+                isDragging = true;
+                dragLastMousePos = mousePos;
+            }
+            else
+            {
+                Vector2 deltaPos = mousePos - dragLastMousePos;
+                Position -= deltaPos * Zoom;
+                dragLastMousePos = mousePos;
+            }
+        }
+        else
+        {
+            isDragging = false;
+        }
+
         // Zoom Controls
         if (Input.IsActionPressed("map_kb_in") || mouseWheelScrollingUp)
         {
@@ -100,10 +124,11 @@ public partial class Camera : Camera2D
             mouseWheelScrollingDown = false;
         }
 
+        Position = new Vector2(
+            Mathf.Clamp(Position.X, leftBound, rightBound),
+            Mathf.Clamp(Position.Y, topBound, bottomBound)
+        );
 
         Zoom = new Vector2(Mathf.Clamp(Zoom.X, zoom_min, zoom_max), Mathf.Clamp(Zoom.Y, zoom_min, zoom_max));
     }
 }
-
-
-// TODO: Function to move the camera to a position
