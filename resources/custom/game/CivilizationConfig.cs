@@ -16,5 +16,9 @@ public partial class CivilizationConfig : Resource
     [Export]
     public string[] CityNames { get; set; } = new string[] { };
 
+    [Export]
+    public UnitConfig[] Units { get; set; } = new UnitConfig[] { };
+
+
 
 }

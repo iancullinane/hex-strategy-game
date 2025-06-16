@@ -4,6 +4,7 @@
 noise_type = 3
 frequency = 0.0115
 offset = Vector3(365.85, 0, 0)
+fractal_type = 2
 fractal_octaves = 1
 fractal_lacunarity = 28.85
 fractal_gain = -8.25

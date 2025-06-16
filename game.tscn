@@ -1,11 +1,13 @@
-[gd_scene load_steps=10 format=3 uid="uid://chaxhjuvnqegi"]
+[gd_scene load_steps=12 format=3 uid="uid://chaxhjuvnqegi"]
 
 [ext_resource type="Script" uid="uid://dqyurt4shygtu" path="res://Game.cs" id="1_80nbo"]
 [ext_resource type="Resource" uid="uid://q60qd3o17apa" path="res://resources/custom/game/base_game_config.tres" id="2_eow3j"]
 [ext_resource type="Texture2D" uid="uid://gakigkw6iqog" path="res://assets/images/wooden_table.jpg" id="2_hve3p"]
+[ext_resource type="Resource" uid="uid://cpenxl6p741ku" path="res://resources/units/base/settler.tres" id="4_iotsf"]
 [ext_resource type="Resource" uid="uid://cc3odiu0tibss" path="res://resources/custom/map/base_noise_config.tres" id="4_j5wjh"]
 [ext_resource type="Script" uid="uid://c6ifsy4rbrt54" path="res://resources/custom/game/CivilizationConfig.cs" id="4_vef74"]
 [ext_resource type="Script" uid="uid://ctev7rbvgs867" path="res://components/Camera.cs" id="5_7jktm"]
+[ext_resource type="Resource" uid="uid://b1wbf1vwv2iut" path="res://resources/units/base/warrior.tres" id="5_hve3p"]
 [ext_resource type="AudioStream" uid="uid://8gc7p5qduib2" path="res://assets/audio/music/piano_one.mp3" id="6_ryrav"]
 [ext_resource type="PackedScene" uid="uid://cscohxpdbawpp" path="res://scenes/ui_manager.tscn" id="7_j5wjh"]
 
@@ -14,6 +16,7 @@ script = ExtResource("4_vef74")
 Name = "Ireland"
 Color = Color(0, 0.513726, 0, 0.980392)
 CityNames = PackedStringArray("Dublin", "Cork", "Galway")
+Units = [ExtResource("4_iotsf"), ExtResource("5_hve3p")]
 metadata/_custom_type_script = "uid://c6ifsy4rbrt54"
 
 [node name="Game" type="Node"]

@@ -8,11 +8,13 @@ public partial class UiManager : Control
     PackedScene startGameUiScene;
     PackedScene generalUiScene;
     PackedScene cityUiScene;
+    PackedScene unitUiScene;
 
     SelectionUi selectionUi;
     StartGameUi startGameUi;
     CityUi cityUi;
     GeneralUi generalUi;
+    UnitUi unitUi;
 
     // Signals
     // ------------------------------------------------------------
@@ -30,7 +32,7 @@ public partial class UiManager : Control
         startGameUiScene = ResourceLoader.Load<PackedScene>("components/ui/StartGameUi.tscn");
         cityUiScene = ResourceLoader.Load<PackedScene>("components/ui/CityUi.tscn");
         generalUiScene = ResourceLoader.Load<PackedScene>("components/ui/GeneralUi.tscn");
-
+        unitUiScene = ResourceLoader.Load<PackedScene>("components/ui/UnitUi.tscn");
 
 
         ShowStartGameUi();
@@ -40,6 +42,14 @@ public partial class UiManager : Control
     {
         EmitSignal(SignalName.EndTurn);
         generalUi.IncrementTurn();
+        RefreshUI();
+    }
+
+
+    public void RefreshUI()
+    {
+        if (cityUi is not null) cityUi.Refresh();
+        if (unitUi is not null) unitUi.Refresh();
     }
 
     public void ShowStartGameUi()
@@ -80,6 +90,12 @@ public partial class UiManager : Control
             cityUi.QueueFree();
             cityUi = null;
         }
+
+        if (unitUi is not null)
+        {
+            unitUi.QueueFree();
+            unitUi = null;
+        }
     }
 
     public void SetCityUi(City city)
@@ -97,6 +113,15 @@ public partial class UiManager : Control
         selectionUi = selectionUiScene.Instantiate<SelectionUi>();
         AddChild(selectionUi);
         selectionUi.SetHex(h);
+    }
+
+    public void SetUnitUi(Unit unit)
+    {
+        HideAllPopups();
+        if (unitUi is not null) unitUi.QueueFree();
+        unitUi = unitUiScene.Instantiate<UnitUi>();
+        AddChild(unitUi);
+        unitUi.SetUnit(unit);
     }
 
 

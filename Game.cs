@@ -11,20 +11,18 @@ public partial class Game : Node
 
     [Export]
     public NoiseConfig noiseConfig;
-
-
-    // [Export]
     public UiManager uiManager;
-
-
-    // private TileMap tileMap;
     private Camera camera;
 
     [Export]
     public CivilizationConfig playerCivilizationConfig;
 
 
-
+    public override void _EnterTree()
+    {
+        //TODO: Should this still be in EnterTree? It has assets but it isn't a scene
+        Unit.LoadUnitAssets();
+    }
 
     public override void _Ready()
     {

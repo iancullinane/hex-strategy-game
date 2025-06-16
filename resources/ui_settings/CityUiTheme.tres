@@ -1,0 +1,23 @@
+[gd_resource type="Theme" load_steps=3 format=3 uid="uid://73web21gjyxe"]
+
+[ext_resource type="FontFile" uid="uid://bsuu26gawmf53" path="res://assets/fonts/Pigeon.otf" id="1_70y2i"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_dprch"]
+bg_color = Color(0, 0, 0, 0.705882)
+corner_radius_top_left = 3
+corner_radius_top_right = 3
+corner_radius_bottom_right = 3
+corner_radius_bottom_left = 3
+corner_detail = 5
+shadow_size = 14
+shadow_offset = Vector2(5, 0)
+
+[resource]
+default_font = ExtResource("1_70y2i")
+default_font_size = 30
+Label/colors/font_shadow_color = Color(0.00392157, 0.00392157, 0.00392157, 0.305882)
+Label/constants/shadow_offset_x = 3
+Label/constants/shadow_offset_y = 2
+Label/font_sizes/font_size = 40
+Label/fonts/font = ExtResource("1_70y2i")
+Panel/styles/panel = SubResource("StyleBoxFlat_dprch")

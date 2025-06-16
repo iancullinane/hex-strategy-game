@@ -41,10 +41,10 @@ public partial class SelectionUi : Panel
 
     public override void _Ready()
     {
-        terrainImage = GetNode<TextureRect>("Box/TerrainImage");
-        typeLabel = GetNode<Label>("Box/Body/TypeLabel");
-        foodLabel = GetNode<Label>("Box/Body/FoodLabel");
-        productionLabel = GetNode<Label>("Box/Body/ProductionLabel");
+        terrainImage = GetNode<TextureRect>("MarginContainer/Box/TerrainImage");
+        typeLabel = GetNode<Label>("MarginContainer/Box/Body/TypeLabel");
+        foodLabel = GetNode<Label>("MarginContainer/Box/Body/FoodLabel");
+        productionLabel = GetNode<Label>("MarginContainer/Box/Body/ProductionLabel");
 
         // Ensure the panel has a size
         CustomMinimumSize = new Vector2(200, 150);

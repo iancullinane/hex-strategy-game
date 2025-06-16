@@ -1,4 +1,7 @@
-[gd_resource type="LabelSettings" format=3 uid="uid://b8c776d8ru26u"]
+[gd_resource type="LabelSettings" load_steps=2 format=3 uid="uid://b8c776d8ru26u"]
+
+[ext_resource type="FontFile" uid="uid://bsuu26gawmf53" path="res://assets/fonts/Pigeon.otf" id="1_rdcox"]
 
 [resource]
+font = ExtResource("1_rdcox")
 font_size = 18

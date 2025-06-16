@@ -1,51 +1,53 @@
 [gd_scene load_steps=4 format=3 uid="uid://bafmbsi6ciblu"]
 
 [ext_resource type="Script" uid="uid://cq333c8fkb2k6" path="res://components/ui/SelectionUi.cs" id="1_adhdg"]
+[ext_resource type="Theme" uid="uid://73web21gjyxe" path="res://resources/ui_settings/CityUiTheme.tres" id="1_w72oh"]
 [ext_resource type="Texture2D" uid="uid://deb2cpd6rpq66" path="res://assets/images/terrain_graphics/plains.jpg" id="2_w72oh"]
-[ext_resource type="LabelSettings" uid="uid://b8c776d8ru26u" path="res://resources/ui_settings/terrain_ui_labels.tres" id="3_brj6b"]
 
 [node name="SelectionUi" type="Panel"]
 custom_minimum_size = Vector2(500, 400)
 offset_left = 4.0
 offset_top = 4.0
 offset_right = 504.0
-offset_bottom = 404.0
+offset_bottom = 510.0
 size_flags_horizontal = 3
 size_flags_vertical = 3
+theme = ExtResource("1_w72oh")
 script = ExtResource("1_adhdg")
 metadata/_edit_group_ = true
 
-[node name="Box" type="VBoxContainer" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
-offset_right = -0.0373993
-offset_bottom = -0.049099
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
 
-[node name="TerrainImage" type="TextureRect" parent="Box"]
+[node name="Box" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="TerrainImage" type="TextureRect" parent="MarginContainer/Box"]
 layout_mode = 2
 size_flags_vertical = 3
 texture = ExtResource("2_w72oh")
 expand_mode = 1
-stretch_mode = 1
 
-[node name="Body" type="VBoxContainer" parent="Box"]
+[node name="Body" type="VBoxContainer" parent="MarginContainer/Box"]
 layout_mode = 2
 
-[node name="TypeLabel" type="Label" parent="Box/Body"]
+[node name="TypeLabel" type="Label" parent="MarginContainer/Box/Body"]
 layout_mode = 2
 text = "Type"
-label_settings = ExtResource("3_brj6b")
 
-[node name="FoodLabel" type="Label" parent="Box/Body"]
+[node name="FoodLabel" type="Label" parent="MarginContainer/Box/Body"]
 layout_mode = 2
 text = "Food"
-label_settings = ExtResource("3_brj6b")
 
-[node name="ProductionLabel" type="Label" parent="Box/Body"]
+[node name="ProductionLabel" type="Label" parent="MarginContainer/Box/Body"]
 layout_mode = 2
 text = "Labor"
-label_settings = ExtResource("3_brj6b")

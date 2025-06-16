@@ -1,0 +1,9 @@
+[gd_scene load_steps=2 format=3 uid="uid://mqumlg4c02x4"]
+
+[ext_resource type="Script" uid="uid://vd3i7qx8pe1m" path="res://components/ui/city/UnitBuildButton.cs" id="1_30twa"]
+
+[node name="Button" type="Button"]
+offset_right = 8.0
+offset_bottom = 8.0
+text = "Unit Build Button "
+script = ExtResource("1_30twa")

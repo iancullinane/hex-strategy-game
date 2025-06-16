@@ -2,7 +2,7 @@
 
 [resource]
 noise_type = 4
-frequency = 0.006
+frequency = 0.047
 fractal_type = 3
 fractal_weighted_strength = 0.61
 domain_warp_enabled = true

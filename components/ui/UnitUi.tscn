@@ -1,0 +1,62 @@
+[gd_scene load_steps=4 format=3 uid="uid://1kqr4hja380n"]
+
+[ext_resource type="Theme" uid="uid://73web21gjyxe" path="res://resources/ui_settings/CityUiTheme.tres" id="1_abe6l"]
+[ext_resource type="Script" uid="uid://dbrnelwl87je7" path="res://components/ui/UnitUi.cs" id="2_868x6"]
+[ext_resource type="Texture2D" uid="uid://bqhhcgptaeaqb" path="res://assets/images/units/warrior_image.jpg" id="2_x1tiv"]
+
+[node name="UnitUI" type="Panel"]
+custom_minimum_size = Vector2(500, 400)
+anchors_preset = 4
+anchor_top = 0.5
+anchor_bottom = 0.5
+offset_left = 1491.0
+offset_top = -599.0
+offset_right = 1991.0
+offset_bottom = 199.0
+grow_vertical = 2
+theme = ExtResource("1_abe6l")
+script = ExtResource("2_868x6")
+
+[node name="MarginContainer" type="MarginContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/margin_left = 20
+theme_override_constants/margin_top = 20
+theme_override_constants/margin_right = 20
+theme_override_constants/margin_bottom = 20
+
+[node name="Box" type="VBoxContainer" parent="MarginContainer"]
+layout_mode = 2
+
+[node name="UnitImage" type="TextureRect" parent="MarginContainer/Box"]
+custom_minimum_size = Vector2(0, 400)
+layout_mode = 2
+size_flags_stretch_ratio = 1.05
+texture = ExtResource("2_x1tiv")
+expand_mode = 1
+
+[node name="Body" type="VBoxContainer" parent="MarginContainer/Box"]
+layout_mode = 2
+
+[node name="UnitType" type="Label" parent="MarginContainer/Box/Body"]
+layout_mode = 2
+text = "Type"
+
+[node name="Health" type="Label" parent="MarginContainer/Box/Body"]
+layout_mode = 2
+text = "Health"
+
+[node name="Move" type="Label" parent="MarginContainer/Box/Body"]
+layout_mode = 2
+text = "Movement"
+
+[node name="Actions" type="Label" parent="MarginContainer/Box/Body"]
+layout_mode = 2
+text = "A ctions"
+
+[node name="UnitActionsMenu" type="VBoxContainer" parent="MarginContainer/Box/Body"]
+layout_mode = 2

@@ -7,18 +7,23 @@ using System.Linq;
 public partial class Civilization
 {
 
-    public string name;
-    public Color color;
-
+    // General housekeeping
     public int id;
-    public List<City> cities;
+    public string name;
+    public bool isPlayer;
+
+
+
+    // City values
     public string[] cityNames;
+    public List<City> cities;
+    public List<Unit> units;
 
+    //  Display
+    public Color color;
     public Color territoryColor;
-
     public int territoryColorAltTileId;
 
-    public bool isPlayer;
 
 
     public Civilization(int id, CivilizationConfig civConfig)
@@ -30,6 +35,7 @@ public partial class Civilization
         this.cityNames = civConfig.CityNames;
 
         cities = new List<City>();
+        units = new List<Unit>();
     }
 
 

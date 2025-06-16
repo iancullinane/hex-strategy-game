@@ -2,6 +2,17 @@ using Godot;
 using System;
 using System.Collections.Generic;
 
+public class BuildQueueItem
+{
+    public UnitConfig config;
+    public int paid = 0;
+
+    public BuildQueueItem(UnitConfig unitConfig)
+    {
+        config = unitConfig;
+    }
+}
+
 public partial class City : Node2D
 {
 
@@ -17,12 +28,11 @@ public partial class City : Node2D
 
     // References
     public TileMap map;
-    public Vector2I centerCoordinates;
 
     // Territory    
+    public Vector2I centerCoordinates;
     public List<Hex> territory;
     public List<Hex> borderTilePool;
-    public List<Hex> borderTiles;
 
     // static, all cities have access to this variable
     public static Dictionary<Hex, City> staticInvalidTiles = new Dictionary<Hex, City>();
@@ -31,11 +41,17 @@ public partial class City : Node2D
     public Civilization civ;
 
     // Gameplay Data
+    public int size = 0;
     public int food = 0;
     public int production = 0;
     public int population = 1;
     public int populationGrowthThreshold;
     public int populationGrowthTracker;
+
+    // Production
+    // Units - Changed to use UnitConfig with progress tracking
+    public List<BuildQueueItem> unitBuildQueue;
+
 
     public override void _Ready()
     {
@@ -44,6 +60,7 @@ public partial class City : Node2D
         sprite = GetNode<Sprite2D>("Sprite2D");
         territory = new List<Hex>();
         borderTilePool = new List<Hex>();
+        unitBuildQueue = new List<BuildQueueItem>();
 
         label.Text = name;
         sprite.Modulate = color;
@@ -51,7 +68,6 @@ public partial class City : Node2D
 
     public void ProcessTurn()
     {
-        GD.Print($"Processing turn for {name}");
         CleanUpBorderPool();
 
         populationGrowthTracker += food;
@@ -65,6 +81,8 @@ public partial class City : Node2D
             AddRandomNewTile();
             map.UpdateCivTerritoryMap(civ);
         }
+
+        ApplyProduction();
     }
 
 
@@ -82,6 +100,36 @@ public partial class City : Node2D
     }
 
 
+    // Production
+    // ------------------------------------------------------------
+
+    public void AddToUnitBuildQueue(UnitConfig unitConfig)
+    {
+        unitBuildQueue.Add(new BuildQueueItem(unitConfig));
+    }
+
+    public void SpawnUnit(BuildQueueItem buildItem)
+    {
+        Unit unitToSpawn = Unit.CreateUnit(buildItem.config);
+        unitToSpawn.Position = map.MapToLocal(centerCoordinates);
+        unitToSpawn.SetCiv(civ);
+        unitToSpawn.coords = centerCoordinates;
+
+        map.AddChild(unitToSpawn);
+    }
+
+    public void ApplyProduction()
+    {
+        if (unitBuildQueue.Count == 0) return;
+        BuildQueueItem itemInProduction = unitBuildQueue[0];
+        itemInProduction.paid += production;
+        if (itemInProduction.paid >= itemInProduction.config.cost)
+        {
+            SpawnUnit(itemInProduction);
+            unitBuildQueue.RemoveAt(0);
+        }
+    }
+
     // Territory
     // ------------------------------------------------------------
 
@@ -92,8 +140,10 @@ public partial class City : Node2D
         {
             hex.ownerCity = this;
             AddValidNeighborsToBorderTilePool(hex);
+            size++;
         }
         territory.AddRange(territoryToAdd);
+
         CalculateTerritoryResourceTotals();
     }
 

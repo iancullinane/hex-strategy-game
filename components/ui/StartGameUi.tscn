@@ -1,9 +1,7 @@
 [gd_scene load_steps=3 format=3 uid="uid://b3dqyyi01ndei"]
 
+[ext_resource type="Theme" uid="uid://73web21gjyxe" path="res://resources/ui_settings/CityUiTheme.tres" id="1_17psb"]
 [ext_resource type="Script" uid="uid://cn2l0sxvvqebt" path="res://components/ui/StartGameUi.cs" id="1_w5jaj"]
-
-[sub_resource type="Theme" id="Theme_w5jaj"]
-default_font_size = 50
 
 [node name="StartGameUi" type="Control"]
 layout_mode = 3
@@ -14,6 +12,7 @@ grow_horizontal = 2
 grow_vertical = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+theme = ExtResource("1_17psb")
 script = ExtResource("1_w5jaj")
 
 [node name="Panel" type="Panel" parent="."]
@@ -38,5 +37,5 @@ theme_override_constants/margin_bottom = 20
 
 [node name="StartGameBtn" type="Button" parent="Panel/MarginContainer"]
 layout_mode = 2
-theme = SubResource("Theme_w5jaj")
+theme_override_font_sizes/font_size = 50
 text = "Start Game"

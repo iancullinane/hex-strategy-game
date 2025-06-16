@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="UnitConfig" load_steps=4 format=3 uid="uid://cpenxl6p741ku"]
+
+[ext_resource type="Script" uid="uid://bkd488c3ywv7a" path="res://resources/units/UnitConfig.cs" id="1_5eesl"]
+[ext_resource type="Texture2D" uid="uid://cliwg3q5a76lr" path="res://assets/images/units/settler.png" id="2_rd10l"]
+[ext_resource type="Texture2D" uid="uid://dr4q4ng3msw2n" path="res://assets/images/units/settler_image.png" id="3_wkrtt"]
+
+[resource]
+script = ExtResource("1_5eesl")
+unitType = 0
+name = "Settler"
+cost = 60
+hp = 2
+movementPoints = 2
+unitImage = ExtResource("3_wkrtt")
+unitIcon = ExtResource("2_rd10l")
+metadata/_custom_type_script = "uid://bkd488c3ywv7a"

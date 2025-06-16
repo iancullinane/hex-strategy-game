@@ -1,5 +1,6 @@
-[gd_scene load_steps=2 format=3 uid="uid://che6krjlra200"]
+[gd_scene load_steps=3 format=3 uid="uid://che6krjlra200"]
 
+[ext_resource type="Theme" uid="uid://73web21gjyxe" path="res://resources/ui_settings/CityUiTheme.tres" id="1_2jd6f"]
 [ext_resource type="Script" uid="uid://b0uhygaf5wpso" path="res://components/ui/GeneralUi.cs" id="1_77p6x"]
 
 [node name="GeneralUI" type="Panel"]
@@ -10,6 +11,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+theme = ExtResource("1_2jd6f")
 script = ExtResource("1_77p6x")
 
 [node name="Container" type="VBoxContainer" parent="."]

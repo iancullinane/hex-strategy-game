@@ -153,6 +153,16 @@ public partial class TileMap : Node2D
     }
 
 
+    public void ProcessTurn()
+    {
+
+        foreach (Civilization civ in civilizations)
+        {
+            civ.ProcessTurn();
+        }
+    }
+
+
     public void SetupMap(GameConfig config, NoiseConfig gameNoiseConfig, UiManager uiManager)
     {
         GD.Print($"Setting up map with width: {config.MapWidth} and height: {config.MapHeight}");
@@ -185,7 +195,7 @@ public partial class TileMap : Node2D
 
     public List<Vector2I> GenerateCivStartingLocations(int numLocations)
     {
-        List<Vector2I> locations = new List<Vector2I>();
+        List<Vector2I> startingPositions = new List<Vector2I>();
         List<Vector2I> plainsTiles = new List<Vector2I>();
 
         ForEachHex((x, y, hex) =>
@@ -199,25 +209,25 @@ public partial class TileMap : Node2D
         Random r = new Random();
         for (int i = 0; i < numLocations; i++)
         {
-            Vector2I coords = new Vector2I();
+            Vector2I randomCoords = new Vector2I();
 
-            bool valid = false;
-            int counter = 0;
+            bool validCoordinate = false;
+            int attempts = 0;
 
-            while (!valid && counter < 10000)
+            while (!validCoordinate && attempts < 10000)
             {
                 if (plainsTiles.Count == 0)
                 {
                     GD.PrintErr("No plains tiles were generated");
                     break;
                 }
-                coords = plainsTiles[r.Next(plainsTiles.Count)];
-                valid = IsValidLocation(coords, locations);
-                counter++;
+                randomCoords = plainsTiles[r.Next(plainsTiles.Count)];
+                validCoordinate = IsValidLocation(randomCoords, startingPositions);
+                attempts++;
             }
 
-            plainsTiles.Remove(coords);
-            foreach (Hex h in GetSurroundingTiles(coords))
+            plainsTiles.Remove(randomCoords);
+            foreach (Hex h in GetSurroundingTiles(randomCoords))
             {
                 foreach (Hex j in GetSurroundingTiles(h.coordinates))
                 {
@@ -231,10 +241,10 @@ public partial class TileMap : Node2D
 
             }
 
-            locations.Add(coords);
+            startingPositions.Add(randomCoords);
         }
 
-        return locations;
+        return startingPositions;
     }
 
     private bool IsValidLocation(Vector2I coord, List<Vector2I> locations)
@@ -487,13 +497,6 @@ public partial class TileMap : Node2D
     // 
     // 
 
-    public void ProcessTurn()
-    {
-        foreach (Civilization civ in civilizations)
-        {
-            civ.ProcessTurn();
-        }
-    }
 
 
     /// <summary>
