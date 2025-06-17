@@ -7,6 +7,7 @@ using UnitType = UnitConfig.UnitType;
 public partial class Unit : Node2D
 {
     public string name = "DEFAULT";
+    public UnitType unitType;
 
     // Initial files defined by a custom resource    [Export]
     public UnitConfig config { get; set; }
@@ -40,23 +41,20 @@ public partial class Unit : Node2D
         name = config.name;
     }
 
-    public static Unit CreateUnit(UnitConfig config)
+    public static Unit CreateUnit(UnitConfig config, Vector2I coords)
     {
         Unit unit = unitScene.Instantiate<Unit>();
         unit.config = config;
         unit.name = config.name;
+        unit.unitType = config.unitType;
+        unit.coords = coords;
+        unit.RefreshVisuals();
         return unit;
     }
 
     private void RefreshVisuals()
     {
         GetNode<Sprite2D>("Sprite2D").Texture = unitSceneResources[config.unitType];
-        GetNode<Label>("Label").Text = name;
-
-        if (civ != null)
-        {
-            GetNode<Label>("Label").Modulate = civ.color;
-        }
     }
 
     public static void LoadUnitAssets()

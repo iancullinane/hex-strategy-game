@@ -32,6 +32,7 @@ public partial class City : Node2D
     // Territory    
     public Vector2I centerCoordinates;
     public List<Hex> territory;
+
     public List<Hex> borderTilePool;
 
     // static, all cities have access to this variable
@@ -110,10 +111,9 @@ public partial class City : Node2D
 
     public void SpawnUnit(BuildQueueItem buildItem)
     {
-        Unit unitToSpawn = Unit.CreateUnit(buildItem.config);
-        unitToSpawn.Position = map.MapToLocal(centerCoordinates);
+        Unit unitToSpawn = Unit.CreateUnit(buildItem.config, GetRandomTerritoryTile().coordinates);
+        unitToSpawn.Position = map.MapToLocal(unitToSpawn.coords);
         unitToSpawn.SetCiv(civ);
-        unitToSpawn.coords = centerCoordinates;
 
         map.AddChild(unitToSpawn);
     }
@@ -213,6 +213,17 @@ public partial class City : Node2D
         {
             borderTilePool.Remove(borderTile);
         }
+    }
+
+
+    public Hex GetRandomTerritoryTile()
+    {
+        if (territory.Count == 0)
+            return null;
+
+        Random random = new Random();
+        int index = random.Next(territory.Count);
+        return territory[index];
     }
 
 }
