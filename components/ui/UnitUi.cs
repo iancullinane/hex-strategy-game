@@ -27,8 +27,8 @@ public partial class UnitUi : Panel
     {
         unitImage.Texture = unit.config.unitImage;
         unitType.Text = unit.name;
-        movements.Text = $"Movements {unit.currentMovementPoints}/{unit.config.movementPoints}";
+        movements.Text = $"Movements {unit.hp}/{unit.config.movementPoints}";
         // hp.Text = unit.config.hp.ToString();
-        hp.Text = $"HP {unit.currentHp}/{unit.config.hp}";
+        hp.Text = $"HP {unit.hp}/{unit.config.hp}";
     }
 }

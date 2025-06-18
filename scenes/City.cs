@@ -115,6 +115,9 @@ public partial class City : Node2D
         unitToSpawn.Position = map.MapToLocal(unitToSpawn.coords);
         unitToSpawn.SetCiv(civ);
 
+        // Connect unit signal to UI manager
+        unitToSpawn.UnitClicked += map.uiManager.SetUnitUi;
+
         map.AddChild(unitToSpawn);
     }
 

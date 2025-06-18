@@ -114,7 +114,7 @@ public partial class TileMap : Node2D
     // Ui
     Vector2I currentSelectedHex = new Vector2I(-1, -1);
     // ------------------------------------------------------------
-    UiManager uiManager;
+    public UiManager uiManager;
 
     // Signals
     // ------------------------------------------------------------

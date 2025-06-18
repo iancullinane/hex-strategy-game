@@ -9,26 +9,40 @@ public partial class Unit : Node2D
     public string name = "DEFAULT";
     public UnitType unitType;
 
-    // Initial files defined by a custom resource    [Export]
+    // All units inherit a basic config
+    [Export]
     public UnitConfig config { get; set; }
 
-    // In scene references
-    public int cost;
-    public int paid = 0;
-    public int currentHp;
-    public int currentMovementPoints;
-
     // Game References
+    public int cost;
+    public int hp;
+    public int movementPoints;
+    public Area2D collider;
+
     public Vector2I coords = new Vector2I();
 
+
+
     public Civilization civ;
+    public bool isSelected = false;
 
     // Unit scene and assets 
     public static PackedScene unitScene; // why static?
 
 
-    // Type as the key, love it
+    // Shared Graphics Resources
     public static Dictionary<UnitType, Texture2D> unitSceneResources;
+
+    // Signals
+    [Signal]
+    public delegate void UnitClickedEventHandler(Unit unit);
+
+
+    public override void _Ready()
+    {
+        collider = GetNode<Area2D>("Sprite2D/Area2D");
+    }
+
 
     public Unit()
     {
@@ -39,6 +53,11 @@ public partial class Unit : Node2D
     {
         config = unitConfig;
         name = config.name;
+        // We set these from the config, but now they
+        // are basically free of it and handled independently
+        hp = config.hp;
+        movementPoints = config.movementPoints;
+        cost = config.cost;
     }
 
     public static Unit CreateUnit(UnitConfig config, Vector2I coords)
@@ -77,5 +96,40 @@ public partial class Unit : Node2D
     public UnitType GetUnitType()
     {
         return config.unitType;
+    }
+
+    public void SetSelected()
+    {
+        isSelected = true;
+        Color brighterColor = civ.color * 1.25f;
+        GetNode<Sprite2D>("Sprite2D").Modulate = brighterColor;
+    }
+
+    public void SetDeselected()
+    {
+        isSelected = false;
+        GetNode<Sprite2D>("Sprite2D").Modulate = civ.color;
+    }
+
+    public override void _UnhandledInput(InputEvent @event)
+    {
+        if (@event is InputEventMouseButton eventMouseButton && eventMouseButton.ButtonIndex == MouseButton.Left && eventMouseButton.Pressed)
+        {
+            var spacesState = GetWorld2D().DirectSpaceState;
+            var point = new PhysicsPointQueryParameters2D();
+            point.CollideWithAreas = true;
+            point.Position = GetGlobalMousePosition();
+            var result = spacesState.IntersectPoint(point);
+            if (result.Count > 0 && (Area2D)result[0]["collider"] == collider)
+            {
+                SetSelected();
+                EmitSignal(SignalName.UnitClicked, this);
+                GetViewport().SetInputAsHandled();
+            }
+            else
+            {
+                SetDeselected();
+            }
+        }
     }
 }
