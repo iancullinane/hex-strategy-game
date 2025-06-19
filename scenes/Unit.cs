@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Numerics;
 using UnitType = UnitConfig.UnitType;
 
@@ -19,18 +20,24 @@ public partial class Unit : Node2D
     public int movementPoints;
     public Area2D collider;
 
+    // Map and selection symbols
     public Vector2I coords = new Vector2I();
-
-
-
     public Civilization civ;
+    private TileMap map;
+    public static Dictionary<Hex, List<Unit>> unitLocations = new Dictionary<Hex, List<Unit>>();
+    public List<Hex> validMovementTiles;
+    public HashSet<TerrainType> impassable = new HashSet<TerrainType>{
+        TerrainType.WATER,
+        TerrainType.SHALLOW_WATER,
+        TerrainType.ICE,
+        TerrainType.MOUNTAIN,
+    };
+
     public bool isSelected = false;
 
-    // Unit scene and assets 
+
+    // Shared Graphics Resources, scene and texture
     public static PackedScene unitScene; // why static?
-
-
-    // Shared Graphics Resources
     public static Dictionary<UnitType, Texture2D> unitSceneResources;
 
     // Signals
@@ -41,35 +48,55 @@ public partial class Unit : Node2D
     public override void _Ready()
     {
         collider = GetNode<Area2D>("Sprite2D/Area2D");
+        CalculateValidAdjacentTiles();
+
+        // This is the case that there is already a unit listed at this location,
+        // which would mean that List exists already
+        if (unitLocations.ContainsKey(map.GetHexAtCoords(this.coords)))
+        {
+            unitLocations[map.GetHexAtCoords(this.coords)].Add(this);
+        }
+        else
+        {
+            unitLocations[map.GetHexAtCoords(this.coords)] = new List<Unit> { this };
+        }
     }
 
+    //
+    // Constructor
+    // ------------------------------------------------------------
 
-    public Unit()
-    {
-        // Default constructor needed for Godot scene instantiation
-    }
-
-    public Unit(UnitConfig unitConfig)
-    {
-        config = unitConfig;
-        name = config.name;
-        // We set these from the config, but now they
-        // are basically free of it and handled independently
-        hp = config.hp;
-        movementPoints = config.movementPoints;
-        cost = config.cost;
-    }
-
-    public static Unit CreateUnit(UnitConfig config, Vector2I coords)
+    // A note about constructors. A typical C# constructor would be in the form:
+    //
+    // public Unit(UnitConfig config, Vector2I coords){}
+    //
+    // However here we use a different approach, and make a new method
+    // which is in effect a constructor. This has to do with Godot.
+    // Ultimately we are not creating a new instance of scene as in traditional
+    // OOP. We need to instantiate and then add to the scene tree. So we
+    // make this constructor/not constructor method instead.
+    public static Unit CreateUnit(UnitConfig config, TileMap map, Vector2I coords)
     {
         Unit unit = unitScene.Instantiate<Unit>();
         unit.config = config;
         unit.name = config.name;
         unit.unitType = config.unitType;
         unit.coords = coords;
+        unit.hp = config.hp;
+        unit.movementPoints = config.movementPoints;
+        unit.cost = config.cost;
         unit.RefreshVisuals();
+
+        // I sort of vaguely dislike this but it does make the
+        // most sense. 
+        unit.map = map;
         return unit;
     }
+
+    #region visuals
+    //
+    // Visuals
+    // ------------------------------------------------------------
 
     private void RefreshVisuals()
     {
@@ -84,14 +111,19 @@ public partial class Unit : Node2D
         unitSceneResources[UnitType.Warrior] = GD.Load<Texture2D>("res://assets/images/units/warrior.png");
         unitSceneResources[UnitType.Settler] = GD.Load<Texture2D>("res://assets/images/units/settler.png");
     }
+    #endregion
 
-
+    #region selection
     public void SetCiv(Civilization civ)
     {
         this.civ = civ;
         GetNode<Sprite2D>("Sprite2D").Modulate = civ.color;
         this.civ.units.Add(this);
     }
+
+    //
+    // Selection & UI
+    // ---------------------------------------
 
     public UnitType GetUnitType()
     {
@@ -101,6 +133,8 @@ public partial class Unit : Node2D
     public void SetSelected()
     {
         isSelected = true;
+        CalculateValidAdjacentTiles();
+
         Color brighterColor = civ.color * 1.25f;
         GetNode<Sprite2D>("Sprite2D").Modulate = brighterColor;
     }
@@ -110,11 +144,33 @@ public partial class Unit : Node2D
         isSelected = false;
         GetNode<Sprite2D>("Sprite2D").Modulate = civ.color;
     }
+    #endregion
+
+
+    #region interaction
+
+    public void CalculateValidAdjacentTiles()
+    {
+        List<Hex> validTiles = map.GetSurroundingTiles(coords).
+            Where(tile => !impassable.Contains(tile.terrainType)
+        ).ToList();
+
+        validMovementTiles = validTiles;
+    }
+    #endregion
+
+
+
+    #region inputhandling
+
+    // Input
+    // ------------------------------------------------------------
 
     public override void _UnhandledInput(InputEvent @event)
     {
         if (@event is InputEventMouseButton eventMouseButton && eventMouseButton.ButtonIndex == MouseButton.Left && eventMouseButton.Pressed)
         {
+
             var spacesState = GetWorld2D().DirectSpaceState;
             var point = new PhysicsPointQueryParameters2D();
             point.CollideWithAreas = true;
@@ -132,4 +188,5 @@ public partial class Unit : Node2D
             }
         }
     }
+    #endregion
 }

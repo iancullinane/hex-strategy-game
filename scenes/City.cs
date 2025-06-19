@@ -111,12 +111,14 @@ public partial class City : Node2D
 
     public void SpawnUnit(BuildQueueItem buildItem)
     {
-        Unit unitToSpawn = Unit.CreateUnit(buildItem.config, GetRandomTerritoryTile().coordinates);
+        Unit unitToSpawn = Unit.CreateUnit(buildItem.config, map, GetRandomTerritoryTile().coordinates);
         unitToSpawn.Position = map.MapToLocal(unitToSpawn.coords);
         unitToSpawn.SetCiv(civ);
 
         // Connect unit signal to UI manager
         unitToSpawn.UnitClicked += map.uiManager.SetUnitUi;
+        unitToSpawn.UnitClicked += map.DeselectCurrentCell;
+
 
         map.AddChild(unitToSpawn);
     }

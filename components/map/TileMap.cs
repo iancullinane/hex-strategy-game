@@ -325,6 +325,11 @@ public partial class TileMap : Node2D
         return surroundingTiles;
     }
 
+    public Hex GetHexAtCoords(Vector2I coords)
+    {
+        return mapData[coords];
+    }
+
     public List<Hex> GetRandomSurroundingTile(Vector2I coords)
     {
         List<Hex> surroundingTiles = GetSurroundingTiles(coords);
@@ -544,6 +549,11 @@ public partial class TileMap : Node2D
         }
 
         SendHexData?.Invoke(mapData[coords]);
+    }
+
+    public void DeselectCurrentCell(Unit unit = null)
+    {
+        overlayLayer.SetCell(currentSelectedHex, -1);
     }
 
     public Hex GetRandomHex()
