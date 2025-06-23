@@ -661,6 +661,7 @@ public partial class TileMap : Node2D
         if (currentlySelectedUnit != null)
         {
             currentlySelectedUnit.Move(GetHexAtMapPosition(coords));
+            uiManager.RefreshUI();
         }
     }
 }
