@@ -21,9 +21,10 @@ public partial class Unit : Node2D
     public Area2D collider;
 
     // Map and selection symbols
-    public Vector2I coords = new Vector2I();
+    public Vector2I unitCoords = new Vector2I();
     public Civilization civ;
     private TileMap map;
+    // The list of all units on the map essentially, as lists to account for unit stacking
     public static Dictionary<Hex, List<Unit>> unitLocations = new Dictionary<Hex, List<Unit>>();
     public List<Hex> validMovementTiles;
     public HashSet<TerrainType> impassable = new HashSet<TerrainType>{
@@ -33,7 +34,10 @@ public partial class Unit : Node2D
         TerrainType.MOUNTAIN,
     };
 
-    public bool isSelected = false;
+    // Static selection management
+    public static Unit currentlySelected = null;
+
+    // public bool isSelected = false;
 
 
     // Shared Graphics Resources, scene and texture
@@ -44,6 +48,11 @@ public partial class Unit : Node2D
     [Signal]
     public delegate void UnitClickedEventHandler(Unit unit);
 
+    #region ready
+    //
+    // Ready
+    // ------------------------------------------------------------
+
 
     public override void _Ready()
     {
@@ -52,16 +61,73 @@ public partial class Unit : Node2D
 
         // This is the case that there is already a unit listed at this location,
         // which would mean that List exists already
-        if (unitLocations.ContainsKey(map.GetHexAtCoords(this.coords)))
+        if (unitLocations.ContainsKey(map.GetHexAtCoords(this.unitCoords)))
         {
-            unitLocations[map.GetHexAtCoords(this.coords)].Add(this);
+            unitLocations[map.GetHexAtCoords(this.unitCoords)].Add(this);
         }
         else
         {
-            unitLocations[map.GetHexAtCoords(this.coords)] = new List<Unit> { this };
+            unitLocations[map.GetHexAtCoords(this.unitCoords)] = new List<Unit> { this };
+        }
+
+        map.uiManager.EndTurn += ProcessTurn;
+    }
+
+    public override void _PhysicsProcess(double delta)
+    {
+
+    }
+
+
+    public void ProcessTurn()
+    {
+        movementPoints = config.movementPoints;
+    }
+
+
+
+    #region movement
+
+    public void Move(Hex hex)
+    {
+        if (currentlySelected == this && movementPoints > 0)
+        {
+            if (validMovementTiles.Contains(hex))
+            {
+                MoveToHex(hex);
+                EmitSignal(SignalName.UnitClicked, this);
+            }
         }
     }
 
+    public void MoveToHex(Hex hexToOccupy)
+    {
+        if (unitLocations.ContainsKey(hexToOccupy) ||
+            unitLocations.ContainsKey(hexToOccupy) &&
+            unitLocations[hexToOccupy].Count == 0)
+        {
+            unitLocations[map.GetHexAtCoords(this.unitCoords)].Remove(this);
+
+            Position = map.MapToLocal(hexToOccupy.coordinates);
+            unitCoords = hexToOccupy.coordinates;
+
+            if (!unitLocations.ContainsKey(hexToOccupy))
+            {
+                Unit.unitLocations[hexToOccupy] = new List<Unit> { this };
+            }
+            else
+            {
+                unitLocations[hexToOccupy].Add(this);
+            }
+        }
+
+        CalculateValidAdjacentTiles();
+        // TODO: Handle moving multiple places in one turn
+        movementPoints--;
+
+    }
+
+    #endregion
     //
     // Constructor
     // ------------------------------------------------------------
@@ -81,7 +147,7 @@ public partial class Unit : Node2D
         unit.config = config;
         unit.name = config.name;
         unit.unitType = config.unitType;
-        unit.coords = coords;
+        unit.unitCoords = coords;
         unit.hp = config.hp;
         unit.movementPoints = config.movementPoints;
         unit.cost = config.cost;
@@ -92,7 +158,7 @@ public partial class Unit : Node2D
         unit.map = map;
         return unit;
     }
-
+    #endregion
     #region visuals
     //
     // Visuals
@@ -132,7 +198,15 @@ public partial class Unit : Node2D
 
     public void SetSelected()
     {
-        isSelected = true;
+        // Deselect the previously selected unit
+        if (currentlySelected != null && currentlySelected != this)
+        {
+            currentlySelected.SetDeselected();
+        }
+
+        // Select this unit
+        // isSelected = true;
+        currentlySelected = this;
         CalculateValidAdjacentTiles();
 
         Color brighterColor = civ.color * 1.25f;
@@ -141,7 +215,11 @@ public partial class Unit : Node2D
 
     public void SetDeselected()
     {
-        isSelected = false;
+        // isSelected = false;
+        if (currentlySelected == this)
+        {
+            currentlySelected = null;
+        }
         GetNode<Sprite2D>("Sprite2D").Modulate = civ.color;
     }
     #endregion
@@ -151,7 +229,7 @@ public partial class Unit : Node2D
 
     public void CalculateValidAdjacentTiles()
     {
-        List<Hex> validTiles = map.GetSurroundingTiles(coords).
+        List<Hex> validTiles = map.GetSurroundingTiles(unitCoords).
             Where(tile => !impassable.Contains(tile.terrainType)
         ).ToList();
 
@@ -168,14 +246,16 @@ public partial class Unit : Node2D
 
     public override void _UnhandledInput(InputEvent @event)
     {
-        if (@event is InputEventMouseButton eventMouseButton && eventMouseButton.ButtonIndex == MouseButton.Left && eventMouseButton.Pressed)
+        if (@event is InputEventMouseButton eventMouseButton &&
+            eventMouseButton.ButtonIndex == MouseButton.Left &&
+            eventMouseButton.Pressed)
         {
-
             var spacesState = GetWorld2D().DirectSpaceState;
             var point = new PhysicsPointQueryParameters2D();
             point.CollideWithAreas = true;
             point.Position = GetGlobalMousePosition();
             var result = spacesState.IntersectPoint(point);
+
             if (result.Count > 0 && (Area2D)result[0]["collider"] == collider)
             {
                 SetSelected();

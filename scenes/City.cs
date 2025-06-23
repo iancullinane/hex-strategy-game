@@ -32,7 +32,6 @@ public partial class City : Node2D
     // Territory    
     public Vector2I centerCoordinates;
     public List<Hex> territory;
-
     public List<Hex> borderTilePool;
 
     // static, all cities have access to this variable
@@ -62,6 +61,9 @@ public partial class City : Node2D
         territory = new List<Hex>();
         borderTilePool = new List<Hex>();
         unitBuildQueue = new List<BuildQueueItem>();
+
+        // Initialize population growth threshold
+        populationGrowthThreshold = POPULATION_GROWTH_THRESHOLD;
 
         label.Text = name;
         sprite.Modulate = color;
@@ -112,7 +114,7 @@ public partial class City : Node2D
     public void SpawnUnit(BuildQueueItem buildItem)
     {
         Unit unitToSpawn = Unit.CreateUnit(buildItem.config, map, GetRandomTerritoryTile().coordinates);
-        unitToSpawn.Position = map.MapToLocal(unitToSpawn.coords);
+        unitToSpawn.Position = map.MapToLocal(unitToSpawn.unitCoords);
         unitToSpawn.SetCiv(civ);
 
         // Connect unit signal to UI manager

@@ -43,4 +43,3 @@ velocity = 30
 
 [node name="AudioStreamPlayer" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("6_ryrav")
-autoplay = true

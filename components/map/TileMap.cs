@@ -522,7 +522,7 @@ public partial class TileMap : Node2D
     {
         overlayLayer.SetCell(currentSelectedHex, -1);
         currentSelectedHex = new Vector2I(-1, -1);
-        uiManager.HideAllPopups();
+        uiManager.HideSelectionUi();
     }
 
     public bool HexInBounds(Vector2I coords)

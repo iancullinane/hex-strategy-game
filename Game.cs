@@ -86,6 +86,7 @@ public partial class Game : Node
             && keyEvent.Keycode == Key.Escape
             && keyEvent.Pressed)
         {
+            uiManager.HideAllPopups();
             map.ClearHexSelection();
             return;
         }
