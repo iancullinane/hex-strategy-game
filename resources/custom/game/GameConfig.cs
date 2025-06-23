@@ -18,6 +18,8 @@ public partial class GameConfig : Resource
     [Export]
     public bool DebugMode { get; set; } = false;
 
+    [Export]
+    public bool VerboseLogging { get; set; } = false;
 
     [Export]
     public CivilizationConfig[] Civilizations { get; set; }

@@ -151,7 +151,7 @@ public partial class TileMap : Node2D
 
     public override void _Ready()
     {
-        GD.Print($"Load resources and setup");
+        GameLogger.Debug("TileMap", "Load resources and setup");
         cityScene = GD.Load<PackedScene>("res://scenes/city.tscn");
         this.SendHexData += uiManager.SetSelectionUi;
         uiManager.EndTurn += ProcessTurn;
@@ -173,7 +173,7 @@ public partial class TileMap : Node2D
 
     public void SetupMap(GameConfig config, NoiseConfig gameNoiseConfig, UiManager uiManager)
     {
-        GD.Print($"Setting up map with width: {config.MapWidth} and height: {config.MapHeight}");
+        GameLogger.Info("TileMap", $"Setting up map with width: {config.MapWidth} and height: {config.MapHeight}");
 
         cities = new Dictionary<Vector2I, City>();
 
@@ -226,7 +226,7 @@ public partial class TileMap : Node2D
             {
                 if (plainsTiles.Count == 0)
                 {
-                    GD.PrintErr("No plains tiles were generated");
+                    GameLogger.Error("TileMap", "No plains tiles were generated");
                     break;
                 }
                 randomCoords = plainsTiles[r.Next(plainsTiles.Count)];
@@ -456,7 +456,7 @@ public partial class TileMap : Node2D
                     terrainTextures[h.terrainType]);
             }
         }
-        GD.Print("Terrain generated");
+        GameLogger.Info("TileMap", "Terrain generated");
     }
 
     public void GenerateResources()

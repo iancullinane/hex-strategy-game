@@ -45,25 +45,20 @@ public partial class Game : Node
             gameConfig.Civilizations = newCivConfigs;
         }
 
+        // Initialize logging system
+        GameLogger.Initialize(gameConfig);
+
         map.SetupMap(gameConfig, noiseConfig, uiManager);
 
         AddChild(map);
 
         uiManager.StartGamePressed += () => StartGame();
-
-
-
-
-        if (gameConfig.DebugMode)
-        {
-            GD.Print("Debug mode enabled");
-        }
     }
 
     public void StartGame()
     {
-        GD.Print("Starting game");
-        GD.Print($"With {gameConfig.Civilizations.Length} civilizations");
+        GameLogger.Info("Game", "Starting game");
+        GameLogger.Info("Game", $"With {gameConfig.Civilizations.Length} civilizations");
         uiManager.HideStartGameUi();
         uiManager.ShowGeneralUi();
         map.GenerateTerrain();
@@ -74,8 +69,6 @@ public partial class Game : Node
         camera.SetBoundaries(map);
         Vector2I playerStartLocation = map.GetCiv(0).cities[0].centerCoordinates;
         camera.MoveTo(playerStartLocation);
-
-
     }
 
 

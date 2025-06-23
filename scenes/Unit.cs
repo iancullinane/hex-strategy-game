@@ -87,11 +87,11 @@ public partial class Unit : Node2D
 
     public void Move(Hex hex)
     {
-        GD.Print("Moving unit to position: " + hex.coordinates);
-        GD.Print("Is unit selected: " + map.IsUnitSelected(this));
-        GD.Print("Movement points: " + movementPoints);
-        GD.Print("Valid movement tiles count: " + validMovementTiles.Count);
-        GD.Print("Is hex in valid tiles: " + validMovementTiles.Contains(hex));
+        GameLogger.Verbose("Unit Movement", $"Moving unit to position: {hex.coordinates}");
+        GameLogger.Verbose("Unit Movement", $"Is unit selected: {map.IsUnitSelected(this)}");
+        GameLogger.Verbose("Unit Movement", $"Movement points: {movementPoints}");
+        GameLogger.Verbose("Unit Movement", $"Valid movement tiles count: {validMovementTiles.Count}");
+        GameLogger.Verbose("Unit Movement", $"Is hex in valid tiles: {validMovementTiles.Contains(hex)}");
 
         if (map.IsUnitSelected(this) && movementPoints > 0)
         {
@@ -102,12 +102,12 @@ public partial class Unit : Node2D
             }
             else
             {
-                GD.Print("Hex not in valid movement tiles");
+                GameLogger.Debug("Unit Movement", "Hex not in valid movement tiles");
             }
         }
         else
         {
-            GD.Print("Unit not selected or no movement points");
+            GameLogger.Debug("Unit Movement", "Unit not selected or no movement points");
         }
     }
 
@@ -115,13 +115,13 @@ public partial class Unit : Node2D
     // would like to do A Star with the tilemaplayer
     public void MoveToHex(Hex hexToOccupy)
     {
-        GD.Print("Attempting to move to hex with units check...");
+        GameLogger.Verbose("Unit Movement", "Attempting to move to hex with units check");
 
         // Check if the hex is unoccupied (either no entry or empty list)
         bool hexIsUnoccupied = !unitLocations.ContainsKey(hexToOccupy) ||
                               (unitLocations.ContainsKey(hexToOccupy) && unitLocations[hexToOccupy].Count == 0);
 
-        GD.Print("Hex is unoccupied: " + hexIsUnoccupied);
+        GameLogger.Verbose("Unit Movement", $"Hex is unoccupied: {hexIsUnoccupied}");
 
         if (hexIsUnoccupied)
         {
@@ -141,11 +141,11 @@ public partial class Unit : Node2D
 
             CalculateValidAdjacentTiles();
             movementPoints--;
-            GD.Print("Unit moved successfully!");
+            GameLogger.Debug("Unit Movement", "Unit moved successfully!");
         }
         else
         {
-            GD.Print("Hex is occupied - combat would happen here");
+            GameLogger.Debug("Unit Movement", "Hex is occupied - combat would happen here");
         }
     }
 
