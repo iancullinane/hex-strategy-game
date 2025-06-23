@@ -52,7 +52,7 @@ text = "Health"
 
 [node name="Move" type="Label" parent="MarginContainer/Box/Body"]
 layout_mode = 2
-text = "Movement"
+text = "Action Points"
 
 [node name="Actions" type="Label" parent="MarginContainer/Box/Body"]
 layout_mode = 2

@@ -17,13 +17,13 @@ public partial class Unit : Node2D
     // Game References
     public int cost;
     public int hp;
-    public int movementPoints;
+    public int actionPoints;
     public Area2D collider;
 
     // Map and selection symbols
     public Vector2I unitCoords = new Vector2I();
     public Civilization civ;
-    private TileMap map;
+    public TileMap map;
     // The list of all units on the map essentially, as lists to account for unit stacking
     public static Dictionary<Hex, List<Unit>> unitLocations = new Dictionary<Hex, List<Unit>>();
     public List<Hex> validMovementTiles;
@@ -78,7 +78,7 @@ public partial class Unit : Node2D
 
     public void ProcessTurn()
     {
-        movementPoints = config.movementPoints;
+        actionPoints = config.actionPoints; // Reset action points each turn
     }
 
 
@@ -89,11 +89,11 @@ public partial class Unit : Node2D
     {
         GameLogger.Verbose("Unit Movement", $"Moving unit to position: {hex.coordinates}");
         GameLogger.Verbose("Unit Movement", $"Is unit selected: {map.IsUnitSelected(this)}");
-        GameLogger.Verbose("Unit Movement", $"Movement points: {movementPoints}");
+        GameLogger.Verbose("Unit Movement", $"Action points: {actionPoints}");
         GameLogger.Verbose("Unit Movement", $"Valid movement tiles count: {validMovementTiles.Count}");
         GameLogger.Verbose("Unit Movement", $"Is hex in valid tiles: {validMovementTiles.Contains(hex)}");
 
-        if (map.IsUnitSelected(this) && movementPoints > 0)
+        if (map.IsUnitSelected(this) && actionPoints > 0)
         {
             if (validMovementTiles.Contains(hex))
             {
@@ -107,7 +107,7 @@ public partial class Unit : Node2D
         }
         else
         {
-            GameLogger.Debug("Unit Movement", "Unit not selected or no movement points");
+            GameLogger.Debug("Unit Movement", "Unit not selected or no action points");
         }
     }
 
@@ -140,7 +140,7 @@ public partial class Unit : Node2D
             }
 
             CalculateValidAdjacentTiles();
-            movementPoints--;
+            actionPoints--;
             GameLogger.Debug("Unit Movement", "Unit moved successfully!");
         }
         else
@@ -171,7 +171,7 @@ public partial class Unit : Node2D
         unit.unitType = config.unitType;
         unit.unitCoords = coords;
         unit.hp = config.hp;
-        unit.movementPoints = config.movementPoints;
+        unit.actionPoints = config.actionPoints;
         unit.cost = config.cost;
         unit.RefreshVisuals();
 
@@ -231,6 +231,10 @@ public partial class Unit : Node2D
         // Visual changes for deselection
         GetNode<Sprite2D>("Sprite2D").Modulate = civ.color;
     }
+    #endregion
+
+    #region actions
+
     #endregion
 
 

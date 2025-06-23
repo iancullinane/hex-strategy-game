@@ -1,15 +1,16 @@
-[gd_resource type="Resource" script_class="GameConfig" load_steps=7 format=3 uid="uid://q60qd3o17apa"]
+[gd_resource type="Resource" script_class="GameConfig" load_steps=8 format=3 uid="uid://q60qd3o17apa"]
 
 [ext_resource type="Script" uid="uid://dp54jav053dwy" path="res://resources/custom/game/GameConfig.cs" id="1_ccwsq"]
 [ext_resource type="Script" uid="uid://c6ifsy4rbrt54" path="res://resources/custom/game/CivilizationConfig.cs" id="1_e2ptq"]
 [ext_resource type="Resource" uid="uid://b1wbf1vwv2iut" path="res://resources/units/base/warrior.tres" id="1_sgpjx"]
+[ext_resource type="Resource" uid="uid://cpenxl6p741ku" path="res://resources/units/base/settler.tres" id="2_ihiaw"]
 
 [sub_resource type="Resource" id="Resource_sgpjx"]
 script = ExtResource("1_e2ptq")
 Name = "America"
 Color = Color(0.113725, 0.431373, 1, 1)
 CityNames = PackedStringArray("New York", "Chicago", "Los Angeles")
-Units = [ExtResource("1_sgpjx")]
+Units = [ExtResource("1_sgpjx"), ExtResource("2_ihiaw")]
 metadata/_custom_type_script = "uid://c6ifsy4rbrt54"
 
 [sub_resource type="Resource" id="Resource_e2ptq"]
@@ -17,7 +18,7 @@ script = ExtResource("1_e2ptq")
 Name = "Russia"
 Color = Color(0.831373, 0, 0, 1)
 CityNames = PackedStringArray("Moscow", "Saint Petersburg", "Novosibirsk")
-Units = []
+Units = [ExtResource("1_sgpjx"), ExtResource("2_ihiaw")]
 metadata/_custom_type_script = "uid://c6ifsy4rbrt54"
 
 [sub_resource type="Resource" id="Resource_ihiaw"]
@@ -25,7 +26,7 @@ script = ExtResource("1_e2ptq")
 Name = "China"
 Color = Color(0.972549, 0, 1, 1)
 CityNames = PackedStringArray("Shanghai", "Beijing", "Chongqing")
-Units = []
+Units = [ExtResource("1_sgpjx"), ExtResource("2_ihiaw")]
 metadata/_custom_type_script = "uid://c6ifsy4rbrt54"
 
 [resource]
@@ -35,6 +36,6 @@ MapHeight = 300
 CameraZoom = 20.0
 CameraOffset = Vector2(0, 0)
 DebugMode = true
-VerboseLogging = true
+VerboseLogging = false
 Civilizations = [SubResource("Resource_sgpjx"), SubResource("Resource_e2ptq"), SubResource("Resource_ihiaw")]
 metadata/_custom_type_script = "uid://dp54jav053dwy"

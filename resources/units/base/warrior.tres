@@ -1,6 +1,7 @@
-[gd_resource type="Resource" script_class="UnitConfig" load_steps=4 format=3 uid="uid://b1wbf1vwv2iut"]
+[gd_resource type="Resource" script_class="UnitConfig" load_steps=5 format=3 uid="uid://b1wbf1vwv2iut"]
 
 [ext_resource type="Script" uid="uid://bkd488c3ywv7a" path="res://resources/units/UnitConfig.cs" id="1_l8naq"]
+[ext_resource type="Resource" path="res://resources/units/actions/move_action.tres" id="1_qdbal"]
 [ext_resource type="Texture2D" uid="uid://687i653tr6ho" path="res://assets/images/units/warrior.png" id="2_qdbal"]
 [ext_resource type="Texture2D" uid="uid://bqhhcgptaeaqb" path="res://assets/images/units/warrior_image.jpg" id="3_ykcnu"]
 
@@ -10,7 +11,8 @@ unitType = 1
 name = "Warrior"
 cost = 60
 hp = 4
-movementPoints = 1
+actionPoints = 1
 unitImage = ExtResource("3_ykcnu")
 unitIcon = ExtResource("2_qdbal")
+actions = [ExtResource("1_qdbal")]
 metadata/_custom_type_script = "uid://bkd488c3ywv7a"

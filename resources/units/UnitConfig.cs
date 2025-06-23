@@ -23,12 +23,15 @@ public partial class UnitConfig : Resource
     public int hp { get; set; }
 
     [Export]
-    public int movementPoints { get; set; }
+    public int actionPoints { get; set; }
 
     [Export]
     public Texture2D unitImage { get; set; }
     [Export]
     public Texture2D unitIcon { get; set; }
+
+    [Export]
+    public UnitAction[] actions { get; set; } = new UnitAction[] { };
 
 }
 
