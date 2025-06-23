@@ -34,9 +34,6 @@ public partial class Unit : Node2D
         TerrainType.MOUNTAIN,
     };
 
-    // Static selection management
-    public static Unit currentlySelected = null;
-
     // public bool isSelected = false;
 
 
@@ -90,21 +87,43 @@ public partial class Unit : Node2D
 
     public void Move(Hex hex)
     {
-        if (currentlySelected == this && movementPoints > 0)
+        GD.Print("Moving unit to position: " + hex.coordinates);
+        GD.Print("Is unit selected: " + map.IsUnitSelected(this));
+        GD.Print("Movement points: " + movementPoints);
+        GD.Print("Valid movement tiles count: " + validMovementTiles.Count);
+        GD.Print("Is hex in valid tiles: " + validMovementTiles.Contains(hex));
+
+        if (map.IsUnitSelected(this) && movementPoints > 0)
         {
             if (validMovementTiles.Contains(hex))
             {
                 MoveToHex(hex);
-                EmitSignal(SignalName.UnitClicked, this);
+                // EmitSignal(SignalName.UnitClicked, this);
             }
+            else
+            {
+                GD.Print("Hex not in valid movement tiles");
+            }
+        }
+        else
+        {
+            GD.Print("Unit not selected or no movement points");
         }
     }
 
+    // TODO: Handle moving multiple places in one turn
+    // would like to do A Star with the tilemaplayer
     public void MoveToHex(Hex hexToOccupy)
     {
-        if (unitLocations.ContainsKey(hexToOccupy) ||
-            unitLocations.ContainsKey(hexToOccupy) &&
-            unitLocations[hexToOccupy].Count == 0)
+        GD.Print("Attempting to move to hex with units check...");
+
+        // Check if the hex is unoccupied (either no entry or empty list)
+        bool hexIsUnoccupied = !unitLocations.ContainsKey(hexToOccupy) ||
+                              (unitLocations.ContainsKey(hexToOccupy) && unitLocations[hexToOccupy].Count == 0);
+
+        GD.Print("Hex is unoccupied: " + hexIsUnoccupied);
+
+        if (hexIsUnoccupied)
         {
             unitLocations[map.GetHexAtCoords(this.unitCoords)].Remove(this);
 
@@ -119,12 +138,15 @@ public partial class Unit : Node2D
             {
                 unitLocations[hexToOccupy].Add(this);
             }
+
+            CalculateValidAdjacentTiles();
+            movementPoints--;
+            GD.Print("Unit moved successfully!");
         }
-
-        CalculateValidAdjacentTiles();
-        // TODO: Handle moving multiple places in one turn
-        movementPoints--;
-
+        else
+        {
+            GD.Print("Hex is occupied - combat would happen here");
+        }
     }
 
     #endregion
@@ -198,28 +220,15 @@ public partial class Unit : Node2D
 
     public void SetSelected()
     {
-        // Deselect the previously selected unit
-        if (currentlySelected != null && currentlySelected != this)
-        {
-            currentlySelected.SetDeselected();
-        }
-
-        // Select this unit
-        // isSelected = true;
-        currentlySelected = this;
+        // Visual changes for selection
         CalculateValidAdjacentTiles();
-
         Color brighterColor = civ.color * 1.25f;
         GetNode<Sprite2D>("Sprite2D").Modulate = brighterColor;
     }
 
     public void SetDeselected()
     {
-        // isSelected = false;
-        if (currentlySelected == this)
-        {
-            currentlySelected = null;
-        }
+        // Visual changes for deselection
         GetNode<Sprite2D>("Sprite2D").Modulate = civ.color;
     }
     #endregion
@@ -227,6 +236,9 @@ public partial class Unit : Node2D
 
     #region interaction
 
+    // CalculateValidAdjacentTiles will take every tile around a hex
+    // and evaluate if it is a valid tile. This will likely become more
+    // complex as we add more terrain types and other interactions
     public void CalculateValidAdjacentTiles()
     {
         List<Hex> validTiles = map.GetSurroundingTiles(unitCoords).
@@ -258,13 +270,13 @@ public partial class Unit : Node2D
 
             if (result.Count > 0 && (Area2D)result[0]["collider"] == collider)
             {
-                SetSelected();
+                map.SetSelectedUnit(this);
                 EmitSignal(SignalName.UnitClicked, this);
                 GetViewport().SetInputAsHandled();
             }
             else
             {
-                SetDeselected();
+                map.ClearSelectedUnit();
             }
         }
     }

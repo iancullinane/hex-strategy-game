@@ -17,7 +17,8 @@ public partial class City : Node2D
 {
 
     // a `static` variable is shared by all instances of a class
-    public static int POPULATION_GROWTH_THRESHOLD = 15;
+    public int POPULATION_GROWTH_THRESHOLD = 15;
+    public static int POPULATION_GROWTH_RATE = 15;
 
     // Base Info
     public string name;
@@ -78,7 +79,7 @@ public partial class City : Node2D
         {
             population++;
             populationGrowthTracker = 0;
-            populationGrowthThreshold += POPULATION_GROWTH_THRESHOLD;
+            populationGrowthThreshold += POPULATION_GROWTH_THRESHOLD * POPULATION_GROWTH_RATE;
 
             //grow territory
             AddRandomNewTile();
@@ -119,7 +120,6 @@ public partial class City : Node2D
 
         // Connect unit signal to UI manager
         unitToSpawn.UnitClicked += map.uiManager.SetUnitUi;
-        unitToSpawn.UnitClicked += map.DeselectCurrentCell;
 
 
         map.AddChild(unitToSpawn);

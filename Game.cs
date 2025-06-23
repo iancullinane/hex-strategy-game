@@ -81,24 +81,33 @@ public partial class Game : Node
 
     public override void _UnhandledInput(InputEvent @event)
     {
-
+        // If esc pressed clear everything
         if (@event is InputEventKey keyEvent
             && keyEvent.Keycode == Key.Escape
             && keyEvent.Pressed)
         {
             uiManager.HideAllPopups();
-            map.ClearHexSelection();
+            map.ClearHexSelection(); // This now also clears unit selection
             return;
         }
 
-        if (@event is not InputEventMouseButton click ||
-            click.ButtonIndex != MouseButton.Left ||
-            !click.Pressed)
+        // Handle mouse button clicks
+        if (@event is InputEventMouseButton click && click.Pressed)
         {
-            return;
+            switch (click.ButtonIndex)
+            {
+                case MouseButton.Left:
+                    HandleLeftClick();
+                    break;
+                case MouseButton.Right:
+                    HandleRightClick();
+                    break;
+            }
         }
+    }
 
-
+    private void HandleLeftClick()
+    {
         Vector2I selectedCoords = map.GetMapPosition();
         bool coordsInBounds = selectedCoords.X >= 0 && selectedCoords.X < map.width &&
                              selectedCoords.Y >= 0 && selectedCoords.Y < map.height;
@@ -109,8 +118,23 @@ public partial class Game : Node
             return;
         }
 
-
         map.SetHexSelection(selectedCoords);
         Hex selectedHex = map.GetHexAtMapPosition(selectedCoords);
+    }
+
+    private void HandleRightClick()
+    {
+        // Right click functionality goes here
+        // For example: context menus, unit orders, etc.
+        Vector2I selectedCoords = map.GetMapPosition();
+        bool coordsInBounds = selectedCoords.X >= 0 && selectedCoords.X < map.width &&
+                             selectedCoords.Y >= 0 && selectedCoords.Y < map.height;
+
+        if (!coordsInBounds)
+        {
+            return;
+        }
+
+        map.MoveSelectedUnit(selectedCoords);
     }
 }
