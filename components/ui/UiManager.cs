@@ -77,20 +77,34 @@ public partial class UiManager : Control
         AddChild(generalUi);
     }
 
+    // Separate hide methods for better control
     public void HideAllPopups()
+    {
+        HideSelectionUi();
+        HideCityUi();
+        HideUnitUi();
+    }
+
+    public void HideSelectionUi()
     {
         if (selectionUi is not null)
         {
             selectionUi.QueueFree();
             selectionUi = null;
         }
+    }
 
+    public void HideCityUi()
+    {
         if (cityUi is not null)
         {
             cityUi.QueueFree();
             cityUi = null;
         }
+    }
 
+    public void HideUnitUi()
+    {
         if (unitUi is not null)
         {
             unitUi.QueueFree();
@@ -100,7 +114,7 @@ public partial class UiManager : Control
 
     public void SetCityUi(City city)
     {
-        HideAllPopups();
+        HideAllPopups(); // Cities are exclusive
         cityUi = cityUiScene.Instantiate<CityUi>();
         AddChild(cityUi);
         cityUi.SetCityUi(city);
@@ -108,8 +122,10 @@ public partial class UiManager : Control
 
     public void SetSelectionUi(Hex h)
     {
-        HideAllPopups();
-        if (selectionUi is not null) selectionUi.QueueFree();
+        // Only hide city UI and selection UI - keep unit UI if active
+        HideCityUi();
+        HideSelectionUi();
+
         selectionUi = selectionUiScene.Instantiate<SelectionUi>();
         AddChild(selectionUi);
         selectionUi.SetHex(h);
@@ -117,8 +133,10 @@ public partial class UiManager : Control
 
     public void SetUnitUi(Unit unit)
     {
-        HideAllPopups();
-        if (unitUi is not null) unitUi.QueueFree();
+        // Only hide city UI - keep selection UI if active
+        HideCityUi();
+        HideUnitUi(); // Replace previous unit UI
+
         unitUi = unitUiScene.Instantiate<UnitUi>();
         AddChild(unitUi);
         unitUi.SetUnit(unit);

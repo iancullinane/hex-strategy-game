@@ -54,6 +54,7 @@ public class Hex
         return $"[{coordinates}]->{terrainType}, food: {food}, production:{production}";
     }
 
+    // TODO configurable resource randomness
     public void SetResources()
     {
         Random r = new Random();
@@ -102,6 +103,7 @@ public partial class TileMap : Node2D
 
     // Loads
     // ------------------------------------------------------------
+    // this is so the map can create cities (and cities create units)
     PackedScene cityScene;
 
     // Map graphics
@@ -112,9 +114,9 @@ public partial class TileMap : Node2D
     TileSetAtlasSource terrainAtlas;
 
     // Ui
-    Vector2I currentSelectedHex = new Vector2I(-1, -1);
     // ------------------------------------------------------------
-    UiManager uiManager;
+    public UiManager uiManager;
+    Vector2I currentSelectedHex = new Vector2I(-1, -1);
 
     // Signals
     // ------------------------------------------------------------
@@ -124,6 +126,9 @@ public partial class TileMap : Node2D
     [Signal]
     public delegate void SendCityUiInfoEventHandler(City c);
 
+
+    // public delegate void RightClickedOnMapEventHadler(Hex hex);
+    // public event RightClickedOnMapEventHadler RightClickOnMap;
 
 
     // Map settings
@@ -140,6 +145,9 @@ public partial class TileMap : Node2D
 
     public Dictionary<Vector2I, City> cities;
     public List<Civilization> civilizations;
+
+    // Unit selection management
+    public Unit currentlySelectedUnit = null;
 
     public override void _Ready()
     {
@@ -323,6 +331,11 @@ public partial class TileMap : Node2D
         }
 
         return surroundingTiles;
+    }
+
+    public Hex GetHexAtCoords(Vector2I coords)
+    {
+        return mapData[coords];
     }
 
     public List<Hex> GetRandomSurroundingTile(Vector2I coords)
@@ -517,7 +530,8 @@ public partial class TileMap : Node2D
     {
         overlayLayer.SetCell(currentSelectedHex, -1);
         currentSelectedHex = new Vector2I(-1, -1);
-        uiManager.HideAllPopups();
+        uiManager.HideSelectionUi();
+        ClearSelectedUnit(); // mayyybe
     }
 
     public bool HexInBounds(Vector2I coords)
@@ -544,6 +558,11 @@ public partial class TileMap : Node2D
         }
 
         SendHexData?.Invoke(mapData[coords]);
+    }
+
+    public void DeselectCurrentCell(Unit unit = null)
+    {
+        overlayLayer.SetCell(currentSelectedHex, -1);
     }
 
     public Hex GetRandomHex()
@@ -600,8 +619,49 @@ public partial class TileMap : Node2D
         return civilizations.FirstOrDefault(c => c.id == id);
     }
 
+    // Unit Selection Management
+    // ------------------------------------------------------------
+
+    public void SetSelectedUnit(Unit unit)
+    {
+        // Deselect the previously selected unit
+        if (currentlySelectedUnit != null && currentlySelectedUnit != unit)
+        {
+            currentlySelectedUnit.SetDeselected();
+        }
+
+        // Select the new unit
+        currentlySelectedUnit = unit;
+        unit.SetSelected();
+    }
+
+    public void ClearSelectedUnit()
+    {
+        if (currentlySelectedUnit != null)
+        {
+            currentlySelectedUnit.SetDeselected();
+            currentlySelectedUnit = null;
+        }
+    }
+
+    public Unit GetSelectedUnit()
+    {
+        return currentlySelectedUnit;
+    }
+
+    public bool IsUnitSelected(Unit unit)
+    {
+        return currentlySelectedUnit == unit;
+    }
 
 
 
-
+    public void MoveSelectedUnit(Vector2I coords)
+    {
+        if (currentlySelectedUnit != null)
+        {
+            currentlySelectedUnit.Move(GetHexAtMapPosition(coords));
+            uiManager.RefreshUI();
+        }
+    }
 }

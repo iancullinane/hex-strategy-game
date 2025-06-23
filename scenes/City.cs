@@ -17,7 +17,8 @@ public partial class City : Node2D
 {
 
     // a `static` variable is shared by all instances of a class
-    public static int POPULATION_GROWTH_THRESHOLD = 15;
+    public int POPULATION_GROWTH_THRESHOLD = 15;
+    public static int POPULATION_GROWTH_RATE = 15;
 
     // Base Info
     public string name;
@@ -32,7 +33,6 @@ public partial class City : Node2D
     // Territory    
     public Vector2I centerCoordinates;
     public List<Hex> territory;
-
     public List<Hex> borderTilePool;
 
     // static, all cities have access to this variable
@@ -63,6 +63,9 @@ public partial class City : Node2D
         borderTilePool = new List<Hex>();
         unitBuildQueue = new List<BuildQueueItem>();
 
+        // Initialize population growth threshold
+        populationGrowthThreshold = POPULATION_GROWTH_THRESHOLD;
+
         label.Text = name;
         sprite.Modulate = color;
     }
@@ -76,7 +79,7 @@ public partial class City : Node2D
         {
             population++;
             populationGrowthTracker = 0;
-            populationGrowthThreshold += POPULATION_GROWTH_THRESHOLD;
+            populationGrowthThreshold += POPULATION_GROWTH_THRESHOLD * POPULATION_GROWTH_RATE;
 
             //grow territory
             AddRandomNewTile();
@@ -111,9 +114,13 @@ public partial class City : Node2D
 
     public void SpawnUnit(BuildQueueItem buildItem)
     {
-        Unit unitToSpawn = Unit.CreateUnit(buildItem.config, GetRandomTerritoryTile().coordinates);
-        unitToSpawn.Position = map.MapToLocal(unitToSpawn.coords);
+        Unit unitToSpawn = Unit.CreateUnit(buildItem.config, map, GetRandomTerritoryTile().coordinates);
+        unitToSpawn.Position = map.MapToLocal(unitToSpawn.unitCoords);
         unitToSpawn.SetCiv(civ);
+
+        // Connect unit signal to UI manager
+        unitToSpawn.UnitClicked += map.uiManager.SetUnitUi;
+
 
         map.AddChild(unitToSpawn);
     }
