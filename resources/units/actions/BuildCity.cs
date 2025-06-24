@@ -21,13 +21,20 @@ public partial class BuildCity : UnitAction
         if (currentHex.terrainType == TerrainType.WATER ||
             currentHex.terrainType == TerrainType.SHALLOW_WATER ||
             currentHex.terrainType == TerrainType.ICE ||
-            currentHex.terrainType == TerrainType.MOUNTAIN)
+            currentHex.terrainType == TerrainType.MOUNTAIN ||
+            currentHex.terrainType == TerrainType.DESERT)
         {
             return false;
         }
 
         // Check if there's already a city here
         if (currentHex.isCityCenter) return false;
+
+        // Check if tile is too close to another city
+        if (City.staticInvalidTiles.ContainsKey(currentHex))
+        {
+            return false;
+        }
 
         return true;
     }
@@ -47,8 +54,6 @@ public partial class BuildCity : UnitAction
         unit.map.CreateCity(unit.civ, unit.unitCoords, cityName);
 
         // Remove the settler unit (it becomes the city)
-        Unit.unitLocations[unit.map.GetHexAtCoords(unit.unitCoords)].Remove(unit);
-        unit.civ.units.Remove(unit);
-        unit.QueueFree();
+        unit.RemoveUnit();
     }
 }

@@ -11,7 +11,7 @@ public partial class Civilization
     public int id;
     public string name;
     public bool isPlayer;
-
+    public CivilizationConfig config;
 
 
     // City values
@@ -28,6 +28,7 @@ public partial class Civilization
 
     public Civilization(int id, CivilizationConfig civConfig)
     {
+        this.config = civConfig;
         this.isPlayer = civConfig.IsPlayer;
         this.id = id;
         this.name = civConfig.Name;
@@ -44,6 +45,21 @@ public partial class Civilization
         foreach (City city in cities)
         {
             city.ProcessTurn();
+        }
+        // Add AI
+        if (!isPlayer)
+        {
+
+            Random r = new Random();
+            // TODO: Add AI logic
+            foreach (City city in cities)
+            {
+                int rand = r.Next(30);
+                if (rand > 27)
+                {
+                    city.AddToUnitBuildQueue(UnitType.Warrior);
+                }
+            }
         }
     }
 

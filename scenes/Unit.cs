@@ -235,6 +235,26 @@ public partial class Unit : Node2D
 
     #region actions
 
+    public void RemoveUnit()
+    {
+        // Remove from unit locations tracking
+        var currentHex = map.GetHexAtCoords(unitCoords);
+        if (Unit.unitLocations.ContainsKey(currentHex))
+        {
+            Unit.unitLocations[currentHex].Remove(this);
+            if (Unit.unitLocations[currentHex].Count == 0)
+            {
+                Unit.unitLocations.Remove(currentHex);
+            }
+        }
+
+        // Remove from civilization
+        civ.units.Remove(this);
+
+        // Remove from scene tree
+        QueueFree();
+    }
+
     #endregion
 
 

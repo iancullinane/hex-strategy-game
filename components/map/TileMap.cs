@@ -531,7 +531,8 @@ public partial class TileMap : Node2D
         overlayLayer.SetCell(currentSelectedHex, -1);
         currentSelectedHex = new Vector2I(-1, -1);
         uiManager.HideSelectionUi();
-        ClearSelectedUnit(); // mayyybe
+        ClearSelectedUnit();
+        ClearSelectedCity();
     }
 
     public bool HexInBounds(Vector2I coords)
@@ -553,6 +554,7 @@ public partial class TileMap : Node2D
 
         if (cities.ContainsKey(coords))
         {
+            SetSelectedCity(cities[coords]);
             EmitSignal(SignalName.SendCityUiInfo, cities[coords]);
             return;
         }
@@ -652,6 +654,53 @@ public partial class TileMap : Node2D
     public bool IsUnitSelected(Unit unit)
     {
         return currentlySelectedUnit == unit;
+    }
+
+    // City Selection Management
+    // ------------------------------------------------------------
+
+    public City currentlySelectedCity = null;
+
+    public void SetSelectedCity(City city)
+    {
+        // Deselect the previously selected city
+        if (currentlySelectedCity != null && currentlySelectedCity != city)
+        {
+            currentlySelectedCity.SetDeselected();
+        }
+
+        // Select the new city
+        currentlySelectedCity = city;
+        city.SetSelected();
+    }
+
+    public void ClearSelectedCity()
+    {
+        if (currentlySelectedCity != null)
+        {
+            currentlySelectedCity.SetDeselected();
+            currentlySelectedCity = null;
+        }
+    }
+
+    public void HighlightCityTerritory(City city, bool highlight)
+    {
+        foreach (Hex hex in city.territory)
+        {
+            if (highlight)
+            {
+                // Add a subtle highlight overlay to territory tiles
+                overlayLayer.SetCell(hex.coordinates, 2, new Vector2I(0, 0));
+            }
+            else
+            {
+                // Remove highlight overlay (but preserve hex selection if it exists)
+                if (hex.coordinates != currentSelectedHex)
+                {
+                    overlayLayer.SetCell(hex.coordinates, -1);
+                }
+            }
+        }
     }
 
 

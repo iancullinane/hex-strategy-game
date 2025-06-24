@@ -53,6 +53,13 @@ public partial class City : Node2D
     // Units - Changed to use UnitConfig with progress tracking
     public List<BuildQueueItem> unitBuildQueue;
 
+    // Selection state
+    public bool isSelected = false;
+
+    // Signals
+    [Signal]
+    public delegate void CityClickedEventHandler(City city);
+
 
     public override void _Ready()
     {
@@ -152,6 +159,12 @@ public partial class City : Node2D
         territory.AddRange(territoryToAdd);
 
         CalculateTerritoryResourceTotals();
+
+        // Refresh highlighting if this city is selected
+        if (isSelected)
+        {
+            map.HighlightCityTerritory(this, true);
+        }
     }
 
     public void AddRandomNewTile()
@@ -180,6 +193,12 @@ public partial class City : Node2D
             hex.terrainType == TerrainType.MOUNTAIN ||
             hex.terrainType == TerrainType.DESERT ||
             hex.terrainType == TerrainType.ICE)
+        {
+            return false;
+        }
+
+        // Check if tile is already owned by another city
+        if (hex.ownerCity != null && hex.ownerCity != this)
         {
             return false;
         }
@@ -231,6 +250,23 @@ public partial class City : Node2D
         Random random = new Random();
         int index = random.Next(territory.Count);
         return territory[index];
+    }
+
+    // Selection methods
+    // ------------------------------------------------------------
+
+    public void SetSelected()
+    {
+        isSelected = true;
+        // Brighten territory tiles
+        map.HighlightCityTerritory(this, true);
+    }
+
+    public void SetDeselected()
+    {
+        isSelected = false;
+        // Return territory tiles to normal
+        map.HighlightCityTerritory(this, false);
     }
 
 }

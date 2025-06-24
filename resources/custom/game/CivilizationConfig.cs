@@ -1,4 +1,5 @@
 using Godot;
+using System.Collections.Generic;
 
 [GlobalClass]
 public partial class CivilizationConfig : Resource
@@ -20,5 +21,6 @@ public partial class CivilizationConfig : Resource
     public UnitConfig[] Units { get; set; } = new UnitConfig[] { };
 
 
-
+    [Export]
+    public List<KeyValuePair<string, int>> KeyValuePairs = new List<KeyValuePair<string, int>>();
 }
