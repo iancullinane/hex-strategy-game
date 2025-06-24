@@ -20,7 +20,22 @@ public partial class CivilizationConfig : Resource
     [Export]
     public UnitConfig[] Units { get; set; } = new UnitConfig[] { };
 
+    private Dictionary<string, UnitConfig> _unitDictionary;
+    public Dictionary<string, UnitConfig> UnitDictionary
+    {
+        get
+        {
+            if (_unitDictionary == null)
+            {
+                _unitDictionary = new Dictionary<string, UnitConfig>();
+                foreach (var unit in Units)
+                {
+                    if (unit != null)
+                        _unitDictionary[unit.name] = unit;
+                }
+            }
+            return _unitDictionary;
+        }
+    }
 
-    [Export]
-    public List<KeyValuePair<string, int>> KeyValuePairs = new List<KeyValuePair<string, int>>();
 }

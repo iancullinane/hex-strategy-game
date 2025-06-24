@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
+using UnitType = UnitConfig.UnitType;
 
 public partial class Civilization
 {
@@ -57,8 +58,23 @@ public partial class Civilization
                 int rand = r.Next(30);
                 if (rand > 27)
                 {
-                    city.AddToUnitBuildQueue(UnitType.Warrior);
+                    city.AddToUnitBuildQueue(config.UnitDictionary["Settler"]);
                 }
+                if (rand > 28)
+                {
+                    city.AddToUnitBuildQueue(config.UnitDictionary["Warrior"]);
+                }
+            }
+
+            foreach (Unit unit in units)
+            {
+
+                if (unit.unitType is UnitType.Settler)
+                {
+                    unit.AI_Settle();
+                }
+
+                unit.AI_RandomMove();
             }
         }
     }

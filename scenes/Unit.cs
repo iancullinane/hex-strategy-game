@@ -305,4 +305,50 @@ public partial class Unit : Node2D
         }
     }
     #endregion
+
+    #region AI Actions
+
+    public void AI_RandomMove()
+    {
+        // Use the Move action instead of built-in movement
+        var moveAction = GetActionByName("Move");
+        if (moveAction != null && validMovementTiles.Count > 0)
+        {
+            Random r = new Random();
+            int rand = r.Next(validMovementTiles.Count);
+            Hex targetHex = validMovementTiles[rand];
+
+            if (moveAction.CanExecute(this, targetHex))
+            {
+                moveAction.Execute(this, targetHex);
+            }
+        }
+    }
+
+    public void AI_Settle()
+    {
+        // Use the Build City action
+        var buildCityAction = GetActionByName("Build City");
+        if (buildCityAction != null && buildCityAction.CanExecute(this))
+        {
+            buildCityAction.Execute(this);
+        }
+    }
+
+    private UnitAction GetActionByName(string actionName)
+    {
+        if (config.actions != null)
+        {
+            foreach (var action in config.actions)
+            {
+                if (action.Name == actionName)
+                {
+                    return action;
+                }
+            }
+        }
+        return null;
+    }
+
+    #endregion
 }
