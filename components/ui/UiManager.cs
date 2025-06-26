@@ -30,7 +30,7 @@ public partial class UiManager : Control
     {
         selectionUiScene = ResourceLoader.Load<PackedScene>("components/ui/SelectionUi.tscn");
         startGameUiScene = ResourceLoader.Load<PackedScene>("components/ui/StartGameUi.tscn");
-        cityUiScene = ResourceLoader.Load<PackedScene>("components/ui/CityUi.tscn");
+        cityUiScene = ResourceLoader.Load<PackedScene>("components/ui/city/CityUi.tscn");
         generalUiScene = ResourceLoader.Load<PackedScene>("components/ui/GeneralUi.tscn");
         unitUiScene = ResourceLoader.Load<PackedScene>("components/ui/UnitUi.tscn");
 

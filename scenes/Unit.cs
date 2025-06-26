@@ -14,14 +14,15 @@ public partial class Unit : Node2D
     [Export]
     public UnitConfig config { get; set; }
 
-    // Game References
+    // Unit Stats
     public int cost;
     public int hp;
     public int actionPoints;
-    public Area2D collider;
+    public int strength;
 
     // Map and selection symbols
     public Vector2I unitCoords = new Vector2I();
+    public Area2D collider;
     public Civilization civ;
     public TileMap map;
     // The list of all units on the map essentially, as lists to account for unit stacking
@@ -33,9 +34,6 @@ public partial class Unit : Node2D
         TerrainType.ICE,
         TerrainType.MOUNTAIN,
     };
-
-    // public bool isSelected = false;
-
 
     // Shared Graphics Resources, scene and texture
     public static PackedScene unitScene; // why static?
@@ -69,12 +67,6 @@ public partial class Unit : Node2D
 
         map.uiManager.EndTurn += ProcessTurn;
     }
-
-    public override void _PhysicsProcess(double delta)
-    {
-
-    }
-
 
     public void ProcessTurn()
     {
@@ -117,6 +109,17 @@ public partial class Unit : Node2D
     {
         GameLogger.Verbose("Unit Movement", "Attempting to move to hex with units check");
 
+        // Check if the hex contains a city of another civilization
+        if (hexToOccupy.isCityCenter && map.cities.ContainsKey(hexToOccupy.coordinates))
+        {
+            City targetCity = map.cities[hexToOccupy.coordinates];
+            if (targetCity.civ != this.civ)
+            {
+                GameLogger.Debug("Unit Movement", $"Move onto city '{targetCity.name}' belonging to {targetCity.civ.name}");
+                targetCity.ChangeOwner(this.civ);
+            }
+        }
+
         // Check if the hex is unoccupied (either no entry or empty list)
         bool hexIsUnoccupied = !unitLocations.ContainsKey(hexToOccupy) ||
                               (unitLocations.ContainsKey(hexToOccupy) && unitLocations[hexToOccupy].Count == 0);
@@ -141,11 +144,48 @@ public partial class Unit : Node2D
 
             CalculateValidAdjacentTiles();
             actionPoints--;
+
+
+            if (hexToOccupy.isCityCenter &&
+                hexToOccupy.ownerCity.civ != this.civ &&
+                this.unitType == UnitType.Warrior)
+            {
+                City targetCity = map.cities[hexToOccupy.coordinates];
+                targetCity.ChangeOwner(this.civ);
+            }
+
             GameLogger.Debug("Unit Movement", "Unit moved successfully!");
         }
         else
         {
-            GameLogger.Debug("Unit Movement", "Hex is occupied - combat would happen here");
+            var occupyingUnit = unitLocations[hexToOccupy][0];
+            if (occupyingUnit.civ != this.civ)
+            {
+                CalculateCombat(this, occupyingUnit);
+            }
+            else
+            {
+                GameLogger.Debug("Unit Movement", "Cannot attack unit from same civilization");
+            }
+        }
+    }
+
+    public void CalculateCombat(Unit beligerant, Unit defender)
+    {
+        GameLogger.Debug("Unit Combat", $"Defender: {defender.name} with {defender.hp} HP");
+        GameLogger.Debug("Unit Combat", $"Beligerant: {beligerant.name} with {beligerant.hp} HP");
+
+        defender.hp -= beligerant.strength;
+        beligerant.hp -= defender.strength / 2;
+
+        if (defender.hp <= 0)
+        {
+            defender.RemoveUnit();
+        }
+
+        if (beligerant.hp <= 0)
+        {
+            beligerant.RemoveUnit();
         }
     }
 
@@ -173,6 +213,7 @@ public partial class Unit : Node2D
         unit.hp = config.hp;
         unit.actionPoints = config.actionPoints;
         unit.cost = config.cost;
+        unit.strength = config.strength;
         unit.RefreshVisuals();
 
         // I sort of vaguely dislike this but it does make the
@@ -237,6 +278,12 @@ public partial class Unit : Node2D
 
     public void RemoveUnit()
     {
+        // Clear selection if this unit is currently selected
+        if (map.IsUnitSelected(this))
+        {
+            map.ClearSelectedUnit();
+        }
+
         // Remove from unit locations tracking
         var currentHex = map.GetHexAtCoords(unitCoords);
         if (Unit.unitLocations.ContainsKey(currentHex))

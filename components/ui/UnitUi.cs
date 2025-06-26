@@ -5,19 +5,20 @@ public partial class UnitUi : Panel
 {
     TextureRect unitImage;
 
-    Label unitType, actionPointsLabel, hp;
+    Label unitTypeLabel, actionPointsLabel, strengthLabel, hpLabel;
 
-    VBoxContainer actions;
+    VBoxContainer actionsContainer;
 
     Unit unit;
 
     public override void _Ready()
     {
         unitImage = GetNode<TextureRect>("MarginContainer/Box/UnitImage");
-        unitType = GetNode<Label>("MarginContainer/Box/Body/UnitType");
-        actionPointsLabel = GetNode<Label>("MarginContainer/Box/Body/Move");
-        hp = GetNode<Label>("MarginContainer/Box/Body/Health");
-        actions = GetNode<VBoxContainer>("MarginContainer/Box/Body/UnitActionsMenu");
+        unitTypeLabel = GetNode<Label>("MarginContainer/Box/Body/UnitType");
+        actionPointsLabel = GetNode<Label>("MarginContainer/Box/Body/AP");
+        strengthLabel = GetNode<Label>("MarginContainer/Box/Body/Strength");
+        hpLabel = GetNode<Label>("MarginContainer/Box/Body/Health");
+        actionsContainer = GetNode<VBoxContainer>("MarginContainer/Box/Body/UnitActionsMenu");
     }
 
     public void SetUnit(Unit unit)
@@ -29,9 +30,10 @@ public partial class UnitUi : Panel
     public void Refresh()
     {
         unitImage.Texture = unit.config.unitImage;
-        unitType.Text = unit.name;
-        hp.Text = $"HP {unit.hp}/{unit.config.hp}";
+        unitTypeLabel.Text = unit.name;
+        hpLabel.Text = $"HP {unit.hp}";
         actionPointsLabel.Text = $"Action points: {unit.actionPoints}";
+        strengthLabel.Text = $"Strength: {unit.config.strength}";
 
         PopulateActionButtons();
     }
@@ -39,7 +41,7 @@ public partial class UnitUi : Panel
     private void PopulateActionButtons()
     {
         // Clear existing action buttons
-        foreach (Node child in actions.GetChildren())
+        foreach (Node child in actionsContainer.GetChildren())
         {
             child.QueueFree();
         }
@@ -69,7 +71,7 @@ public partial class UnitUi : Panel
                     actionButton.Text += " (Unavailable)";
                 }
                 GameLogger.Debug("add button");
-                actions.AddChild(actionButton);
+                actionsContainer.AddChild(actionButton);
             }
         }
     }

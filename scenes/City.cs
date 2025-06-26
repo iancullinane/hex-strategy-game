@@ -60,6 +60,10 @@ public partial class City : Node2D
     [Signal]
     public delegate void CityClickedEventHandler(City city);
 
+    [Signal]
+    public delegate void UnitProductionChangedEventHandler();
+
+    #region core loop
 
     public override void _Ready()
     {
@@ -76,6 +80,7 @@ public partial class City : Node2D
         label.Text = name;
         sprite.Modulate = color;
     }
+
 
     public void ProcessTurn()
     {
@@ -96,9 +101,12 @@ public partial class City : Node2D
         ApplyProduction();
     }
 
+    #endregion
 
+    #region settings
     // Settings
     // ------------------------------------------------------------
+
 
     public void SetCityName(string newName)
     {
@@ -110,13 +118,20 @@ public partial class City : Node2D
         color = newColor;
     }
 
+    #endregion
+
+    #region production
+
+
 
     // Production
     // ------------------------------------------------------------
 
     public void AddToUnitBuildQueue(UnitConfig unitConfig)
     {
+        if (!civ.CanBuildMoreUnits()) return;
         unitBuildQueue.Add(new BuildQueueItem(unitConfig));
+        EmitSignal(SignalName.UnitProductionChanged);
     }
 
     public void SpawnUnit(BuildQueueItem buildItem)
@@ -141,8 +156,13 @@ public partial class City : Node2D
         {
             SpawnUnit(itemInProduction);
             unitBuildQueue.RemoveAt(0);
+            EmitSignal(SignalName.UnitProductionChanged);
         }
     }
+
+    #endregion
+
+    #region territory
 
     // Territory
     // ------------------------------------------------------------
@@ -252,6 +272,25 @@ public partial class City : Node2D
         return territory[index];
     }
 
+    public void ChangeOwner(Civilization newOwner)
+    {
+        Civilization oldOwner = civ;
+        this.civ.cities.Remove(this);
+        newOwner.cities.Add(this);
+        civ = newOwner;
+        SetIconColor(newOwner.color);
+        sprite.Modulate = newOwner.color;
+        map.UpdateCivTerritoryMap(newOwner);
+        map.UpdateCivTerritoryMap(oldOwner);
+
+        // TODO: Remove units from old city
+    }
+
+
+    #endregion
+
+    #region selection
+
     // Selection methods
     // ------------------------------------------------------------
 
@@ -269,4 +308,5 @@ public partial class City : Node2D
         map.HighlightCityTerritory(this, false);
     }
 
+    #endregion
 }

@@ -14,6 +14,8 @@ public partial class Civilization
     public bool isPlayer;
     public CivilizationConfig config;
 
+    public int maxUnits = 3;
+    public int maxUnitsBase = 3;
 
     // City values
     public string[] cityNames;
@@ -43,10 +45,15 @@ public partial class Civilization
 
     public void ProcessTurn()
     {
-        foreach (City city in cities)
+        if (isPlayer)
         {
-            city.ProcessTurn();
+            foreach (City city in cities)
+            {
+                city.ProcessTurn();
+            }   // TODO: Add player logic
         }
+
+
         // Add AI
         if (!isPlayer)
         {
@@ -64,6 +71,7 @@ public partial class Civilization
                 {
                     city.AddToUnitBuildQueue(config.UnitDictionary["Warrior"]);
                 }
+                city.ProcessTurn();
             }
 
             foreach (Unit unit in units)
@@ -90,6 +98,37 @@ public partial class Civilization
         string nextName = cityNames[0];
         cityNames = cityNames.Skip(1).ToArray();
         return nextName;
+    }
+
+    public void UpdateMaxUnits()
+    {
+        maxUnits = maxUnitsBase * cities.Count;
+    }
+
+    /// <summary>
+    /// Gets the total number of units including those on the map and those in production queues
+    /// </summary>
+    /// <returns>Total unit count (existing + in production)</returns>
+    public int GetTotalUnitCount()
+    {
+        int totalUnits = units.Count; // Units on the map
+
+        // Add units in production queues across all cities
+        foreach (City city in cities)
+        {
+            totalUnits += city.unitBuildQueue.Count;
+        }
+
+        return totalUnits;
+    }
+
+    /// <summary>
+    /// Checks if the civilization can build more units (including queued ones)
+    /// </summary>
+    /// <returns>True if under the unit limit, false otherwise</returns>
+    public bool CanBuildMoreUnits()
+    {
+        return GetTotalUnitCount() < maxUnits;
     }
 
 }

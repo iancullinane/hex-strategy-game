@@ -1,7 +1,7 @@
 using Godot;
 using System.Collections.Generic;
 
-
+[GlobalClass, Icon("res://editor/icons/game.png")]
 public partial class Game : Node
 {
     private TileMap map;
@@ -72,6 +72,8 @@ public partial class Game : Node
     }
 
 
+    // Handle the most top level input here
+    // camera input is handled as a part of the camera class, not here
     public override void _UnhandledInput(InputEvent @event)
     {
         // If esc pressed clear everything

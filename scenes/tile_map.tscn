@@ -1,6 +1,6 @@
 [gd_scene load_steps=4 format=3 uid="uid://fudc0lrtgat0"]
 
-[ext_resource type="Script" uid="uid://dxomqqyd4xwcp" path="res://components/map/TileMap.cs" id="1_dohrl"]
+[ext_resource type="Script" uid="uid://dxomqqyd4xwcp" path="res://scenes/TileMap.cs" id="1_dohrl"]
 [ext_resource type="TileSet" uid="uid://bqc5g484obtd" path="res://resources/tiles/base_tileset.tres" id="3_kvphj"]
 [ext_resource type="TileSet" uid="uid://bp0alv0hmtfrn" path="res://resources/tiles/border_tileset.tres" id="4_5ie0g"]
 
