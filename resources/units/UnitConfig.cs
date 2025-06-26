@@ -26,6 +26,9 @@ public partial class UnitConfig : Resource
     public int actionPoints { get; set; }
 
     [Export]
+    public int strength { get; set; }
+
+    [Export]
     public Texture2D unitImage { get; set; }
     [Export]
     public Texture2D unitIcon { get; set; }

@@ -1,6 +1,6 @@
 [gd_scene load_steps=5 format=3 uid="uid://rxh1d15byxb5"]
 
-[ext_resource type="Script" uid="uid://cyh6rgrhf6doa" path="res://components/ui/CityUi.cs" id="1_aewv4"]
+[ext_resource type="Script" uid="uid://cyh6rgrhf6doa" path="res://components/ui/city/CityUi.cs" id="1_aewv4"]
 [ext_resource type="Theme" uid="uid://73web21gjyxe" path="res://resources/ui_settings/CityUiTheme.tres" id="1_dprch"]
 [ext_resource type="Texture2D" uid="uid://dpb20fbv6hge" path="res://assets/images/terrain_graphics/city_painting.jpg" id="1_v2dwm"]
 [ext_resource type="PackedScene" uid="uid://mqumlg4c02x4" path="res://components/ui/city/unit_build_button.tscn" id="4_dprch"]

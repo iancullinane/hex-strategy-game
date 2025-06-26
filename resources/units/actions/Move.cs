@@ -25,30 +25,7 @@ public partial class Move : UnitAction
             return;
         }
 
-        // Remove unit from old location
-        var oldHex = unit.map.GetHexAtCoords(unit.unitCoords);
-        Unit.unitLocations[oldHex].Remove(unit);
-        if (Unit.unitLocations[oldHex].Count == 0)
-        {
-            Unit.unitLocations.Remove(oldHex);
-        }
-
-        // Update unit position
-        unit.unitCoords = targetHex.coordinates;
-        unit.Position = unit.map.MapToLocal(unit.unitCoords);
-        unit.actionPoints -= ActionPointCost;
-
-        // Add unit to new location
-        if (Unit.unitLocations.ContainsKey(targetHex))
-        {
-            Unit.unitLocations[targetHex].Add(unit);
-        }
-        else
-        {
-            Unit.unitLocations[targetHex] = new List<Unit> { unit };
-        }
-
-        // Recalculate valid moves from new position
+        unit.MoveToHex(targetHex);
         unit.CalculateValidAdjacentTiles();
     }
 }

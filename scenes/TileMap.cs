@@ -4,100 +4,10 @@ using System.Collections.Generic;
 using System.Data.Common;
 using System.Linq;
 
-public enum TerrainType
-{
-    PLAINS,
-    WATER,
-    DESERT,
-    MOUNTAIN,
-    ICE,
-    SHALLOW_WATER,
-    BEACH,
-    FOREST,
-    CIV_COLOR_BASE,
-}
-
-/// <summary>
-/// Represents the possible terrain types in the game world.
-/// PLAINS: Basic grassland terrain
-/// WATER: Deep water bodies
-/// DESERT: Arid sandy regions
-/// MOUNTAIN: Elevated rocky terrain
-/// ICE: Frozen terrain
-/// SHALLOW_WATER: Coastal waters
-/// BEACH: Sandy coastal areas
-/// FOREST: Wooded regions
-/// </summary>
-public class Hex
-{
-
-
-
-    public readonly Vector2I coordinates;
-    public TerrainType terrainType;
-
-    public int food { get; set; }
-    public int production { get; set; }
-
-    public City ownerCity;
-
-    public bool isCityCenter = false;
-
-    public Hex(Vector2I coordinates)
-    {
-        this.coordinates = coordinates;
-        ownerCity = null;
-    }
-
-    public override string ToString()
-    {
-        return $"[{coordinates}]->{terrainType}, food: {food}, production:{production}";
-    }
-
-    // TODO configurable resource randomness
-    public void SetResources()
-    {
-        Random r = new Random();
-
-        switch (terrainType)
-        {
-            case TerrainType.PLAINS:
-                food = r.Next(10);
-                production = r.Next(10);
-                break;
-            case TerrainType.MOUNTAIN:
-                food = r.Next(2);
-                production = r.Next(20);
-                break;
-            case TerrainType.WATER:
-                food = 4;
-                production = 0;
-                break;
-            case TerrainType.DESERT:
-                food = r.Next(1);
-                production = r.Next(2);
-                break;
-            case TerrainType.ICE:
-                break;
-            case TerrainType.FOREST:
-                food = r.Next(5);
-                production = r.Next(15);
-                break;
-            default:
-                food = 0;
-                production = 0;
-                break;
-
-        }
-
-    }
-
-}
 
 /// <summary>
 /// A hexagonal TileMap representation. Contains a base layer, border layer, and overlay layer.
 /// </summary>
-
 public partial class TileMap : Node2D
 {
 
@@ -108,15 +18,18 @@ public partial class TileMap : Node2D
 
     // Map graphics
     // ------------------------------------------------------------
+    // These layers need to be initialized on generation
     TileMapLayer baseLayer, civLayer, borderLayer, overlayLayer;
     Dictionary<TerrainType, Vector2I> terrainTextures;
-
     TileSetAtlasSource terrainAtlas;
 
     // Ui
     // ------------------------------------------------------------
     public UiManager uiManager;
+    // TODO: Do I need selected hex and selected unit? Cities don't select either,
+    // perhaps it should just be "selected" and that can be a unit or a city or a hex
     Vector2I currentSelectedHex = new Vector2I(-1, -1);
+    public Unit currentlySelectedUnit = null;
 
     // Signals
     // ------------------------------------------------------------
@@ -147,8 +60,8 @@ public partial class TileMap : Node2D
     public List<Civilization> civilizations;
 
     // Unit selection management
-    public Unit currentlySelectedUnit = null;
 
+    #region core loop
     public override void _Ready()
     {
         GameLogger.Debug("TileMap", "Load resources and setup");
@@ -169,7 +82,64 @@ public partial class TileMap : Node2D
             civ.ProcessTurn();
         }
     }
+    #endregion
 
+    #region hex getters
+
+
+    /// <summary>
+    /// Converts the current global mouse position to map coordinates
+    /// </summary>
+    /// <returns>The map coordinates (Vector2I) corresponding to the current mouse position</returns>
+    public Vector2I GetMapPosition()
+    {
+        return baseLayer.LocalToMap(ToLocal(GetGlobalMousePosition()));
+    }
+
+    // Convert map coordinates to local coordinates, since all the a
+    // layers are the same size we could use on of them, but we use
+    // the baseLayer because obviously
+    public Vector2 MapToLocal(Vector2I coords)
+    {
+        return baseLayer.MapToLocal(coords);
+    }
+
+
+    public List<Hex> GetSurroundingTiles(Vector2I coords)
+    {
+        List<Hex> surroundingTiles = new List<Hex>();
+
+        foreach (Vector2I coord in baseLayer.GetSurroundingCells(coords))
+        {
+            if (HexInBounds(coord))
+            {
+                surroundingTiles.Add(mapData[coord]);
+            }
+        }
+
+        return surroundingTiles;
+    }
+
+    public Hex GetHexAtCoords(Vector2I coords)
+    {
+        return mapData[coords];
+    }
+
+    public List<Hex> GetRandomSurroundingTile(Vector2I coords)
+    {
+        List<Hex> surroundingTiles = GetSurroundingTiles(coords);
+        if (surroundingTiles.Count == 0)
+            return new List<Hex>();
+
+        Random random = new Random();
+        int index = random.Next(surroundingTiles.Count);
+        return new List<Hex> { surroundingTiles[index] };
+    }
+
+    #endregion
+
+
+    #region map setup
 
     public void SetupMap(GameConfig config, NoiseConfig gameNoiseConfig, UiManager uiManager)
     {
@@ -185,7 +155,7 @@ public partial class TileMap : Node2D
         this.uiManager = uiManager;
     }
 
-
+    // This is just to ensure the map is loaded in memory and accesible throughout the class
     private void SetupNodeRefs()
     {
         uiManager = GetNode<UiManager>("/root/Game/CanvasLayer/NewUiManager");
@@ -201,11 +171,12 @@ public partial class TileMap : Node2D
     // City Generation
     // ------------------------------------------------------------
 
-    public List<Vector2I> GenerateCivStartingLocations(int numLocations)
+    public List<Vector2I> GenerateCivStartingLocations(int civCount)
     {
         List<Vector2I> startingPositions = new List<Vector2I>();
         List<Vector2I> plainsTiles = new List<Vector2I>();
 
+        // Collect only plains tiles as viable positions
         ForEachHex((x, y, hex) =>
         {
             if (hex.terrainType == TerrainType.PLAINS)
@@ -215,13 +186,15 @@ public partial class TileMap : Node2D
         });
 
         Random r = new Random();
-        for (int i = 0; i < numLocations; i++)
+        for (int i = 0; i < civCount; i++)
         {
-            Vector2I randomCoords = new Vector2I();
+            Vector2I civPlacement = new Vector2I();
 
             bool validCoordinate = false;
             int attempts = 0;
 
+            // In case a map generates without plains, we don't
+            // want to be stuck forever in the loop
             while (!validCoordinate && attempts < 10000)
             {
                 if (plainsTiles.Count == 0)
@@ -229,13 +202,13 @@ public partial class TileMap : Node2D
                     GameLogger.Error("TileMap", "No plains tiles were generated");
                     break;
                 }
-                randomCoords = plainsTiles[r.Next(plainsTiles.Count)];
-                validCoordinate = IsValidLocation(randomCoords, startingPositions);
+                civPlacement = plainsTiles[r.Next(plainsTiles.Count)];
+                validCoordinate = LocationInBounds(civPlacement, startingPositions);
                 attempts++;
             }
 
-            plainsTiles.Remove(randomCoords);
-            foreach (Hex h in GetSurroundingTiles(randomCoords))
+            plainsTiles.Remove(civPlacement);
+            foreach (Hex h in GetSurroundingTiles(civPlacement))
             {
                 foreach (Hex j in GetSurroundingTiles(h.coordinates))
                 {
@@ -249,21 +222,23 @@ public partial class TileMap : Node2D
 
             }
 
-            startingPositions.Add(randomCoords);
+            startingPositions.Add(civPlacement);
         }
 
         return startingPositions;
     }
 
-    private bool IsValidLocation(Vector2I coord, List<Vector2I> locations)
+    private bool LocationInBounds(Vector2I coord, List<Vector2I> previouslySelectedLocations)
     {
+        // Reject positions within 3 tiles of the map edge
         if (coord.X < 3 || coord.X > width - 3 ||
-            coord.Y < 3 || coord.X > width - 3)
+            coord.Y < 3 || coord.Y > height - 3)
         {
             return false;
         }
 
-        foreach (Vector2I location in locations)
+        // Don't be too close to another civ starting point
+        foreach (Vector2I location in previouslySelectedLocations)
         {
             if (Math.Abs(coord.X - location.X) <= 20 &&
                 Math.Abs(coord.Y - location.Y) <= 20)
@@ -274,6 +249,10 @@ public partial class TileMap : Node2D
 
         return true;
     }
+    #endregion
+
+    #region city generation
+
 
     public void CreateCity(Civilization civ, Vector2I cityCoords, string name)
     {
@@ -318,45 +297,18 @@ public partial class TileMap : Node2D
         }
     }
 
-    public List<Hex> GetSurroundingTiles(Vector2I coords)
-    {
-        List<Hex> surroundingTiles = new List<Hex>();
+    #endregion
 
-        foreach (Vector2I coord in baseLayer.GetSurroundingCells(coords))
-        {
-            if (HexInBounds(coord))
-            {
-                surroundingTiles.Add(mapData[coord]);
-            }
-        }
-
-        return surroundingTiles;
-    }
-
-    public Hex GetHexAtCoords(Vector2I coords)
-    {
-        return mapData[coords];
-    }
-
-    public List<Hex> GetRandomSurroundingTile(Vector2I coords)
-    {
-        List<Hex> surroundingTiles = GetSurroundingTiles(coords);
-        if (surroundingTiles.Count == 0)
-            return new List<Hex>();
-
-        Random random = new Random();
-        int index = random.Next(surroundingTiles.Count);
-        return new List<Hex> { surroundingTiles[index] };
-    }
-
-
+    #region generators
     // Generators
     // ------------------------------------------------------------
 
 
+    // GenerateTerrain loads the noise maps for each layer
+    // and then iterates through the map x\y and sets a terrain type
     public void GenerateTerrain()
     {
-        // Local noise maps are for keeping track durint the 
+        // Local noise maps are for keeping track during the 
         // actual SetCell calls etc
         float[,] localBaseMap = new float[width, height];
         float[,] localForestMap = new float[width, height];
@@ -377,7 +329,8 @@ public partial class TileMap : Node2D
 
         // I wonder if I could turn this into something which could be exported
         // OR! even cooler tweaked and re-rendered as the values are edited (or as a CustomResource)
-        List<(float Min, float Max, TerrainType Type)> terrainGenValues = new List<(float Min, float Max, TerrainType Type)>
+        List<(float Min, float Max, TerrainType Type)>
+        terrainGenValues = new List<(float Min, float Max, TerrainType Type)>
         {
             (0, baseNoiseData.MaxValue/10 * 2.5f, TerrainType.WATER), // The lower 25% of the map will be water, lower here is more like the 0-1 value of the noise
             (baseNoiseData.MaxValue/10 * 2.5f, baseNoiseData.MaxValue/10*4f, TerrainType.SHALLOW_WATER),
@@ -427,7 +380,7 @@ public partial class TileMap : Node2D
 
 
 
-                baseLayer.SetCell(new Vector2I(x, y), 1, terrainTextures[h.terrainType]);
+                baseLayer.SetCell(new Vector2I(x, y), 2, terrainTextures[h.terrainType]);
                 borderLayer.SetCell(new Vector2I(x, y), 2, new Vector2I(0, 0));
             }
 
@@ -442,7 +395,7 @@ public partial class TileMap : Node2D
             {
                 Hex h = mapData[new Vector2I(x, y)];
                 h.terrainType = TerrainType.ICE;
-                baseLayer.SetCell(new Vector2I(x, y), 0, terrainTextures[h.terrainType]);
+                baseLayer.SetCell(new Vector2I(x, y), 2, terrainTextures[h.terrainType]);
             }
 
             // South Pole
@@ -452,7 +405,7 @@ public partial class TileMap : Node2D
                 h.terrainType = TerrainType.ICE;
                 baseLayer.SetCell(
                     new Vector2I(x, y),
-                    0,
+                    2,
                     terrainTextures[h.terrainType]);
             }
         }
@@ -493,33 +446,11 @@ public partial class TileMap : Node2D
             startingLocations.RemoveAt(0);
         }
     }
-
+    #endregion
     // Utils
     // ------------------------------------------------------------
 
-    // Convert map coordinates to local coordinates, since all the a
-    // layers are the same size we could use on of them, but we use
-    // the baseLayer because obviously
-    public Vector2 MapToLocal(Vector2I coords)
-    {
-        return baseLayer.MapToLocal(coords);
-    }
-
-
-    // 
-    // 
-    // 
-
-
-
-    /// <summary>
-    /// Converts the current global mouse position to map coordinates
-    /// </summary>
-    /// <returns>The map coordinates (Vector2I) corresponding to the current mouse position</returns>
-    public Vector2I GetMapPosition()
-    {
-        return baseLayer.LocalToMap(ToLocal(GetGlobalMousePosition()));
-    }
+    #region selection helpers
 
     public Hex GetHexAtMapPosition(Vector2I coords)
     {
@@ -578,25 +509,10 @@ public partial class TileMap : Node2D
         int index = random.Next(mapData.Count);
         return mapData.ElementAt(index).Value;
     }
-
+    #endregion
 
     // Graphics
     // ------------------------------------------------------------
-    private void InitializeTerrainTextures()
-    {
-        terrainTextures = new Dictionary<TerrainType, Vector2I>
-        {
-            {TerrainType.PLAINS, new Vector2I(0, 0)},
-            {TerrainType.WATER, new Vector2I(1, 0)},
-            {TerrainType.DESERT, new Vector2I(0, 1)},
-            {TerrainType.MOUNTAIN, new Vector2I(1, 1)},
-            {TerrainType.SHALLOW_WATER, new Vector2I(1, 2)},
-            {TerrainType.BEACH, new Vector2I(0, 2)},
-            {TerrainType.FOREST, new Vector2I(1, 3)},
-            {TerrainType.ICE, new Vector2I(0, 3)},
-            {TerrainType.CIV_COLOR_BASE, new Vector2I(0, 3)},
-       };
-    }
 
 
 
@@ -683,6 +599,9 @@ public partial class TileMap : Node2D
         }
     }
 
+
+    #region city and unit methods
+
     public void HighlightCityTerritory(City city, bool highlight)
     {
         foreach (Hex hex in city.territory)
@@ -713,4 +632,27 @@ public partial class TileMap : Node2D
             uiManager.RefreshUI();
         }
     }
+
+    #endregion
+
+    #region graphics
+
+    private void InitializeTerrainTextures()
+    {
+        terrainTextures = new Dictionary<TerrainType, Vector2I>
+        {
+            {TerrainType.PLAINS, new Vector2I(0, 2)},
+            {TerrainType.WATER, new Vector2I(2, 2)},
+            {TerrainType.DESERT, new Vector2I(2, 0)},
+            {TerrainType.MOUNTAIN, new Vector2I(2, 1)},
+            {TerrainType.SHALLOW_WATER, new Vector2I(1, 2)},
+            {TerrainType.BEACH, new Vector2I(0, 0)},
+            {TerrainType.FOREST, new Vector2I(0, 1)},
+            {TerrainType.ICE, new Vector2I(1, 1)},
+            {TerrainType.CIV_COLOR_BASE, new Vector2I(1, 0)},
+       };
+    }
+
+    #endregion
+
 }

@@ -31,8 +31,8 @@ metadata/_custom_type_script = "uid://c6ifsy4rbrt54"
 
 [resource]
 script = ExtResource("1_ccwsq")
-MapWidth = 100
-MapHeight = 100
+MapWidth = 20
+MapHeight = 20
 CameraZoom = 20.0
 CameraOffset = Vector2(0, 0)
 DebugMode = true

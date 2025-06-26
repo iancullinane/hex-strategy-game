@@ -52,7 +52,7 @@ public partial class BuildCity : UnitAction
 
         // Create the city
         unit.map.CreateCity(unit.civ, unit.unitCoords, cityName);
-
+        unit.civ.UpdateMaxUnits();
         // Remove the settler unit (it becomes the city)
         unit.RemoveUnit();
     }

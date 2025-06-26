@@ -55,6 +55,15 @@ public partial class CityUi : Panel
             button.unitConfig = unitConfig;
             button.Text = unitConfig.name;
 
+            // Check if civilization has reached max unit limit (including queued units)
+            bool canBuildUnit = city.civ.CanBuildMoreUnits();
+            button.Disabled = !canBuildUnit;
+
+            if (!canBuildUnit)
+            {
+                button.Text += " (Max Units Reached)";
+            }
+
             // Connect signals
             button.OnPressed += city.AddToUnitBuildQueue;
             button.OnPressed += RefreshFromConfig;
@@ -85,8 +94,21 @@ public partial class CityUi : Panel
 
     public void SetCityUi(City city)
     {
+        // Disconnect from previous city if exists
+        if (this.city != null && this.city.IsConnected(City.SignalName.UnitProductionChanged, new Callable(this, MethodName.RefreshBuildButtons)))
+        {
+            this.city.UnitProductionChanged -= RefreshBuildButtons;
+        }
+
         // city.CalculateTerritoryResourceTotals();
         this.city = city;
+
+        // Connect to the new city's unit production change signal to refresh UI
+        if (!city.IsConnected(City.SignalName.UnitProductionChanged, new Callable(this, MethodName.RefreshBuildButtons)))
+        {
+            city.UnitProductionChanged += RefreshBuildButtons;
+        }
+
         Refresh();
         ConnectUnitBuildSignals(city);
     }
@@ -131,6 +153,23 @@ public partial class CityUi : Panel
             {
                 unitBuildQueueContainer.AddChild(new Label() { Text = $"Building {item.config.name} {item.config.cost}" });
             }
+        }
+    }
+
+    /// <summary>
+    /// Refreshes just the build buttons when unit production changes
+    /// </summary>
+    public void RefreshBuildButtons()
+    {
+        ConnectUnitBuildSignals(city);
+    }
+
+    public override void _ExitTree()
+    {
+        // Clean up signal connections when UI is destroyed
+        if (city != null && city.IsConnected(City.SignalName.UnitProductionChanged, new Callable(this, MethodName.RefreshBuildButtons)))
+        {
+            city.UnitProductionChanged -= RefreshBuildButtons;
         }
     }
 }

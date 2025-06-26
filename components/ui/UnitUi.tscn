@@ -50,13 +50,17 @@ text = "Type"
 layout_mode = 2
 text = "Health"
 
-[node name="Move" type="Label" parent="MarginContainer/Box/Body"]
+[node name="AP" type="Label" parent="MarginContainer/Box/Body"]
 layout_mode = 2
 text = "Action Points"
 
+[node name="Strength" type="Label" parent="MarginContainer/Box/Body"]
+layout_mode = 2
+text = "Strength"
+
 [node name="Actions" type="Label" parent="MarginContainer/Box/Body"]
 layout_mode = 2
-text = "A ctions"
+text = "Actions"
 
 [node name="UnitActionsMenu" type="VBoxContainer" parent="MarginContainer/Box/Body"]
 layout_mode = 2
